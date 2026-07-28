@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const links = [
   { href: "/", label: "Home" },
@@ -15,7 +16,7 @@ export default function Nav() {
         >
           Aatman Soni
         </Link>
-        <div className="flex gap-6 text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="flex items-center gap-6 text-sm text-zinc-600 dark:text-zinc-400">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -25,6 +26,7 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
+          <ThemeToggle />
         </div>
       </nav>
     </header>
