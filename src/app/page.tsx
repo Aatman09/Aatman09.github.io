@@ -62,18 +62,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* In progress callout */}
-      <section className="mt-12 rounded-lg border border-dashed border-zinc-300 p-5 dark:border-zinc-700">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          <span className="font-medium text-zinc-900 dark:text-zinc-100">
-            Currently building:
-          </span>{" "}
-          rag-bench — a from-scratch RAG pipeline with a real evaluation
-          harness (recall@k, MRR, nDCG) instead of just a demo. In progress;
-          a project page goes up once there are results to show.
-        </p>
-      </section>
-
       {/* Skills */}
       <section className="mt-14">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-500">
