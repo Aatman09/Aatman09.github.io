@@ -23,7 +23,10 @@ export default async function ProjectPage({
         href="/"
         className="label inline-block text-graphite transition-colors hover:text-ink"
       >
-        ← Work
+        <span aria-hidden="true" className="mr-1.5 tracking-normal">
+          ←
+        </span>
+        Work
       </Link>
 
       <header className="mt-12 grid grid-cols-1 gap-x-10 gap-y-6 border-b border-ink pb-9 sm:grid-cols-[9rem_1fr]">

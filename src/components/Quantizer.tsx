@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * Symmetric per-tensor integer quantization, drawn live.
@@ -14,9 +14,12 @@ import { useMemo, useRef, useState } from "react";
  */
 
 const N = 320;
-const W = 1000;
 const PAD_X = 22;
-const PLOT_W = W - PAD_X * 2;
+
+// The plot keeps a fixed pixel height, so a narrow screen needs a narrower
+// viewBox or the whole figure scales down to an illegible strip.
+const WIDE_W = 1000;
+const NARROW_W = 560;
 
 const MAIN_TOP = 24;
 const MAIN_H = 196;
@@ -47,7 +50,6 @@ const AMAX = Math.max(...SAMPLES.map((s) => Math.abs(s.v)));
 const VRANGE = AMAX * 1.14;
 const PX_PER_UNIT = MAIN_H / 2 / VRANGE;
 
-const xToPx = (x: number) => PAD_X + x * PLOT_W;
 const vToPy = (v: number) => MAIN_CY - v * PX_PER_UNIT;
 
 type Precision = { id: string; label: string; bits: number | null; note: string };
@@ -76,7 +78,20 @@ const PRECISIONS: Precision[] = [
 export default function Quantizer() {
   const [precisionId, setPrecisionId] = useState("int8");
   const [cursor, setCursor] = useState<number | null>(null);
+  const [narrow, setNarrow] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const sync = () => setNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const W = narrow ? NARROW_W : WIDE_W;
+  const PLOT_W = W - PAD_X * 2;
+  const xToPx = (x: number) => PAD_X + x * PLOT_W;
 
   const precision =
     PRECISIONS.find((p) => p.id === precisionId) ?? PRECISIONS[1];
@@ -118,7 +133,8 @@ export default function Quantizer() {
         (s, i) =>
           `${i === 0 ? "M" : "L"}${xToPx(s.x).toFixed(2)} ${vToPy(s.v).toFixed(2)}`,
       ).join(" "),
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [W],
   );
 
   // True stairs: hold the value across the sample, then jump.
@@ -130,7 +146,8 @@ export default function Quantizer() {
       d += ` L${px} ${vToPy(q[i - 1]).toFixed(2)} L${px} ${vToPy(q[i]).toFixed(2)}`;
     }
     return d;
-  }, [model.quantized]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model.quantized, W]);
 
   const residualPath = useMemo(() => {
     const q = model.quantized;
@@ -139,7 +156,7 @@ export default function Quantizer() {
         `${i === 0 ? "M" : "L"}${xToPx(s.x).toFixed(2)} ${resToPy(s.v - q[i]).toFixed(2)}`,
     ).join(" ");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model.quantized, model.gain]);
+  }, [model.quantized, model.gain, W]);
 
   // Only draw the level grid while it stays legible.
   const levelLines = useMemo(() => {
@@ -247,7 +264,7 @@ export default function Quantizer() {
             x={PAD_X}
             y={RES_TOP + 4}
             fill="var(--graphite)"
-            fontSize={11}
+            fontSize={narrow ? 15 : 11}
             letterSpacing="0.13em"
             style={{ fontFamily: "var(--font-plex-mono), monospace" }}
           >

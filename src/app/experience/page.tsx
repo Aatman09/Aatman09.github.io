@@ -12,7 +12,10 @@ export default function ExperiencePage() {
         href="/"
         className="label inline-block text-graphite transition-colors hover:text-ink"
       >
-        ← Work
+        <span aria-hidden="true" className="mr-1.5 tracking-normal">
+          ←
+        </span>
+        Work
       </Link>
 
       <header className="mt-12 border-b border-ink pb-8">
