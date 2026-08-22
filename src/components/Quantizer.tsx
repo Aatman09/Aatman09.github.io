@@ -5,25 +5,36 @@ import { useMemo, useRef, useState } from "react";
 /**
  * Symmetric per-tensor integer quantization, drawn live.
  *
- * The curve is a stand-in weight distribution; the staircase is that curve
- * snapped to 2^(b-1)-1 signed levels, the same scheme gemma2-quant uses.
- * At int8 the two are visually indistinguishable — which is the finding.
- * At int4 the grid is coarse enough to see the error open up.
+ * Top trace: a stand-in weight distribution (graphite) and the same values
+ * snapped to 2^(b-1)-1 signed levels (signal) — the scheme gemma2-quant uses.
+ * At int8 the two are indistinguishable, which is exactly the finding, so the
+ * strip below carries the residual at a stated gain the way a scope would.
+ * The gain is what makes int8's error readable at all; the numeric max-error
+ * readout is what keeps the comparison honest.
  */
 
-const N = 300;
+const N = 320;
 const W = 1000;
-const H = 360;
-const PAD = { top: 26, right: 22, bottom: 26, left: 22 };
-const PLOT_W = W - PAD.left - PAD.right;
-const PLOT_H = H - PAD.top - PAD.bottom;
-const CY = PAD.top + PLOT_H / 2;
+const PAD_X = 22;
+const PLOT_W = W - PAD_X * 2;
+
+const MAIN_TOP = 24;
+const MAIN_H = 196;
+const MAIN_CY = MAIN_TOP + MAIN_H / 2;
+
+const RES_TOP = 244;
+const RES_H = 76;
+const RES_CY = RES_TOP + RES_H / 2;
+const H = RES_TOP + RES_H + 16;
+
+const GAIN_STEPS = [1, 2, 5, 10, 20, 50, 100, 200];
 
 function weightCurve(x: number) {
   return (
-    0.86 * Math.exp(-11 * (x - 0.27) ** 2) -
-    0.78 * Math.exp(-18 * (x - 0.7) ** 2) +
-    0.14 * Math.sin(10.5 * x + 0.4)
+    0.8 * Math.exp(-12 * (x - 0.26) ** 2) -
+    0.72 * Math.exp(-20 * (x - 0.68) ** 2) +
+    0.11 * Math.sin(27.5 * x + 0.4) +
+    0.055 * Math.sin(61 * x + 1.9)
   );
 }
 
@@ -33,17 +44,13 @@ const SAMPLES = Array.from({ length: N }, (_, i) => {
 });
 
 const AMAX = Math.max(...SAMPLES.map((s) => Math.abs(s.v)));
-const VRANGE = AMAX * 1.18;
+const VRANGE = AMAX * 1.14;
+const PX_PER_UNIT = MAIN_H / 2 / VRANGE;
 
-const xToPx = (x: number) => PAD.left + x * PLOT_W;
-const vToPy = (v: number) => CY - (v / VRANGE) * (PLOT_H / 2);
+const xToPx = (x: number) => PAD_X + x * PLOT_W;
+const vToPy = (v: number) => MAIN_CY - v * PX_PER_UNIT;
 
-type Precision = {
-  id: string;
-  label: string;
-  bits: number | null;
-  note: string;
-};
+type Precision = { id: string; label: string; bits: number | null; note: string };
 
 const PRECISIONS: Precision[] = [
   {
@@ -62,7 +69,7 @@ const PRECISIONS: Precision[] = [
     id: "int4",
     label: "int4",
     bits: 4,
-    note: "Not measured. The from-scratch pipeline stops at int8 — the error above is why int4 needs more than round-to-nearest.",
+    note: "Not measured. The from-scratch pipeline stops at int8 — the residual above is why int4 needs more than round-to-nearest.",
   },
 ];
 
@@ -82,19 +89,28 @@ export default function Quantizer() {
         delta: null,
         levels: null,
         maxError: 0,
+        gain: 1,
       };
     }
     const qmax = 2 ** (bits - 1) - 1;
     const delta = AMAX / qmax;
     let maxError = 0;
     const quantized = SAMPLES.map((s) => {
-      const q =
-        Math.max(-qmax, Math.min(qmax, Math.round(s.v / delta))) * delta;
+      const q = Math.max(-qmax, Math.min(qmax, Math.round(s.v / delta))) * delta;
       maxError = Math.max(maxError, Math.abs(s.v - q));
       return q;
     });
-    return { quantized, delta, levels: 2 * qmax + 1, maxError };
+
+    // Pick the largest round gain that keeps the residual inside its strip.
+    const room = RES_H / 2 - 7;
+    const raw = room / Math.max(maxError * PX_PER_UNIT, 1e-9);
+    const gain =
+      [...GAIN_STEPS].reverse().find((g) => g <= raw) ?? GAIN_STEPS[0];
+
+    return { quantized, delta, levels: 2 * qmax + 1, maxError, gain };
   }, [precision]);
+
+  const resToPy = (r: number) => RES_CY - r * PX_PER_UNIT * model.gain;
 
   const curvePath = useMemo(
     () =>
@@ -116,21 +132,16 @@ export default function Quantizer() {
     return d;
   }, [model.quantized]);
 
-  const errorPath = useMemo(() => {
-    if (precision.bits === null) return null;
+  const residualPath = useMemo(() => {
     const q = model.quantized;
-    const forward = SAMPLES.map(
+    return SAMPLES.map(
       (s, i) =>
-        `${i === 0 ? "M" : "L"}${xToPx(s.x).toFixed(2)} ${vToPy(s.v).toFixed(2)}`,
+        `${i === 0 ? "M" : "L"}${xToPx(s.x).toFixed(2)} ${resToPy(s.v - q[i]).toFixed(2)}`,
     ).join(" ");
-    const back = [];
-    for (let i = q.length - 1; i >= 0; i--) {
-      back.push(`L${xToPx(SAMPLES[i].x).toFixed(2)} ${vToPy(q[i]).toFixed(2)}`);
-    }
-    return `${forward} ${back.join(" ")} Z`;
-  }, [model.quantized, precision.bits]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model.quantized, model.gain]);
 
-  // Only draw the level grid when it stays legible.
+  // Only draw the level grid while it stays legible.
   const levelLines = useMemo(() => {
     if (model.delta === null || model.levels === null || model.levels > 33) {
       return [];
@@ -147,15 +158,14 @@ export default function Quantizer() {
   function handlePointer(e: React.PointerEvent<SVGSVGElement>) {
     const rect = svgRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const frac = ((e.clientX - rect.left) / rect.width) * W;
-    const x = (frac - PAD.left) / PLOT_W;
-    if (x < 0 || x > 1) return setCursor(null);
-    setCursor(Math.round(x * (N - 1)));
+    const x = ((e.clientX - rect.left) / rect.width) * W;
+    const frac = (x - PAD_X) / PLOT_W;
+    if (frac < 0 || frac > 1) return setCursor(null);
+    setCursor(Math.round(frac * (N - 1)));
   }
 
-  const readIndex = cursor ?? Math.round(0.27 * (N - 1));
-  const readTrue = SAMPLES[readIndex].v;
-  const readQuant = model.quantized[readIndex];
+  const i = cursor;
+  const quantized = precision.bits !== null;
 
   return (
     <figure className="m-0">
@@ -171,21 +181,21 @@ export default function Quantizer() {
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
           role="img"
-          aria-label={`Plot of a weight distribution and the same distribution quantized to ${
-            precision.label
-          }${
-            model.levels ? `, ${model.levels} levels` : ", shown as the reference curve"
+          aria-label={`A weight distribution and the same values quantized to ${precision.label}${
+            model.levels
+              ? `, ${model.levels} levels, maximum error ${model.maxError.toFixed(4)}`
+              : ", shown as the reference curve"
           }.`}
           className="block h-auto w-full touch-none"
           onPointerMove={handlePointer}
           onPointerLeave={() => setCursor(null)}
         >
-          {/* Quantization levels — the grid the whole design is named for */}
+          {/* Quantization levels — the grid the design is named for */}
           {levelLines.map((v) => (
             <line
               key={v}
-              x1={PAD.left}
-              x2={W - PAD.right}
+              x1={PAD_X}
+              x2={W - PAD_X}
               y1={vToPy(v)}
               y2={vToPy(v)}
               stroke="var(--rule)"
@@ -193,30 +203,16 @@ export default function Quantizer() {
             />
           ))}
 
-          {/* Zero */}
           <line
-            x1={PAD.left}
-            x2={W - PAD.right}
-            y1={CY}
-            y2={CY}
+            x1={PAD_X}
+            x2={W - PAD_X}
+            y1={MAIN_CY}
+            y2={MAIN_CY}
             stroke="var(--rule-strong)"
             strokeWidth={1}
           />
 
-          {errorPath && (
-            <path d={errorPath} fill="var(--signal)" fillOpacity={0.16} />
-          )}
-
-          <path
-            d={curvePath}
-            fill="none"
-            stroke="var(--graphite)"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            className="q-draw"
-          />
-
-          {precision.bits !== null && (
+          {quantized && (
             <path
               key={precision.id}
               d={stepPath}
@@ -228,27 +224,75 @@ export default function Quantizer() {
             />
           )}
 
-          {cursor !== null && (
+          {/* Reference curve rides on top so both traces stay readable */}
+          <path
+            d={curvePath}
+            fill="none"
+            stroke="var(--graphite)"
+            strokeWidth={1.25}
+            strokeLinecap="round"
+            className="q-draw"
+          />
+
+          {/* Residual strip */}
+          <line
+            x1={PAD_X}
+            x2={W - PAD_X}
+            y1={RES_TOP - 12}
+            y2={RES_TOP - 12}
+            stroke="var(--rule)"
+            strokeWidth={1}
+          />
+          <text
+            x={PAD_X}
+            y={RES_TOP + 4}
+            fill="var(--graphite)"
+            fontSize={11}
+            letterSpacing="0.13em"
+            style={{ fontFamily: "var(--font-plex-mono), monospace" }}
+          >
+            {quantized
+              ? `RESIDUAL  ×${model.gain}`
+              : "RESIDUAL  —  REFERENCE"}
+          </text>
+          <line
+            x1={PAD_X}
+            x2={W - PAD_X}
+            y1={RES_CY}
+            y2={RES_CY}
+            stroke="var(--rule)"
+            strokeWidth={1}
+          />
+          <path
+            key={`res-${precision.id}`}
+            d={residualPath}
+            fill="none"
+            stroke={quantized ? "var(--signal)" : "var(--rule-strong)"}
+            strokeWidth={1.25}
+            className="q-snap"
+          />
+
+          {i !== null && (
             <g>
               <line
-                x1={xToPx(SAMPLES[readIndex].x)}
-                x2={xToPx(SAMPLES[readIndex].x)}
-                y1={PAD.top}
-                y2={H - PAD.bottom}
+                x1={xToPx(SAMPLES[i].x)}
+                x2={xToPx(SAMPLES[i].x)}
+                y1={MAIN_TOP}
+                y2={RES_TOP + RES_H}
                 stroke="var(--rule-strong)"
                 strokeWidth={1}
               />
               <circle
-                cx={xToPx(SAMPLES[readIndex].x)}
-                cy={vToPy(readTrue)}
-                r={3.5}
+                cx={xToPx(SAMPLES[i].x)}
+                cy={vToPy(SAMPLES[i].v)}
+                r={3}
                 fill="var(--graphite)"
               />
-              {precision.bits !== null && (
+              {quantized && (
                 <circle
-                  cx={xToPx(SAMPLES[readIndex].x)}
-                  cy={vToPy(readQuant)}
-                  r={4}
+                  cx={xToPx(SAMPLES[i].x)}
+                  cy={vToPy(model.quantized[i])}
+                  r={3.5}
                   fill="var(--signal)"
                 />
               )}
@@ -284,7 +328,7 @@ export default function Quantizer() {
           })}
         </div>
 
-        <dl className="tnum grid grid-cols-3 gap-x-6 gap-y-1 font-mono text-sm text-ink sm:gap-x-8 sm:text-right">
+        <dl className="tnum grid grid-cols-3 gap-x-6 gap-y-1 font-mono text-sm text-ink sm:gap-x-9 sm:text-right">
           <div>
             <dt className="label text-graphite">Levels</dt>
             <dd className="mt-1">{model.levels ?? "ref"}</dd>
@@ -297,9 +341,7 @@ export default function Quantizer() {
           </div>
           <div>
             <dt className="label text-graphite">Max error</dt>
-            <dd className="mt-1 text-accent-text">
-              {model.maxError.toFixed(4)}
-            </dd>
+            <dd className="mt-1 text-accent-text">{model.maxError.toFixed(4)}</dd>
           </div>
         </dl>
       </div>
