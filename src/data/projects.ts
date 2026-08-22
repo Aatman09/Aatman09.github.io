@@ -2,6 +2,15 @@ export type Project = {
   slug: string;
   title: string;
   oneLiner: string;
+  /**
+   * The defining value for this project — a benchmark, a speedup, a merged PR
+   * number. It leads the row in the index, so it has to be something real:
+   * where there is no honest number, the marker carries the defining fact
+   * instead. Never a sequence position.
+   */
+  marker: string;
+  markerLabel: string;
+  markerNote?: string;
   stack: string[];
   github?: string;
   status: "shipped" | "in-progress";
@@ -9,10 +18,14 @@ export type Project = {
   deepDive: {
     heading: string;
     body: string[]; // paragraphs
+    /** "limits" renders the section as a called-out caveat block. */
+    tone?: "limits";
   }[];
   resultsTable?: {
     headers: string[];
     rows: string[][];
+    /** Index of the row that is this project's own result. */
+    highlightRow?: number;
   };
 };
 
@@ -22,6 +35,9 @@ export const projects: Project[] = [
     title: "gemma2-quant",
     oneLiner:
       "From-scratch int8 quantization for Gemma 2 2B — measured against bf16 and bitsandbytes, not just implemented.",
+    marker: "12.53",
+    markerLabel: "Perplexity",
+    markerNote: "bf16 baseline 12.46 · bitsandbytes 12.70",
     stack: ["Python", "PyTorch", "Hugging Face Transformers", "FastAPI"],
     github: "https://github.com/Aatman09/gemma2-quant-serve",
     status: "shipped",
@@ -56,6 +72,7 @@ export const projects: Project[] = [
       },
       {
         heading: "Honest limitations",
+        tone: "limits",
         body: [
           "nn.Embedding is not quantized yet — it's the largest remaining memory chunk.",
           "Weight tying between embed_tokens and lm_head is broken by the current Linear-replacement walk; skipping lm_head would recover the tie and shrink memory further.",
@@ -65,6 +82,7 @@ export const projects: Project[] = [
     ],
     resultsTable: {
       headers: ["Model", "Memory", "Δ Memory", "Perplexity", "Δ Quality"],
+      highlightRow: 1,
       rows: [
         ["bf16 (baseline)", "4.87 GB", "—", "12.46", "—"],
         ["int8 (from scratch)", "3.54 GB", "-27%", "12.53", "+0.56%"],
@@ -77,6 +95,9 @@ export const projects: Project[] = [
     title: "achat",
     oneLiner:
       "GPT-2 built by hand in PyTorch, trained on FineWeb, and extended with a from-scratch KV-cache inference engine.",
+    marker: "3.0×",
+    markerLabel: "Faster step",
+    markerNote: "15s → under 5s per step on one RTX 4050",
     stack: ["Python", "PyTorch", "CUDA", "tiktoken", "FastAPI", "React"],
     github: "https://github.com/Aatman09/achat",
     status: "shipped",
@@ -112,6 +133,9 @@ export const projects: Project[] = [
     title: "Transformer for Machine Translation",
     oneLiner:
       "Full encoder-decoder Transformer built from scratch in JAX/Flax for English-to-Spanish translation.",
+    marker: "EN→ES",
+    markerLabel: "Translation",
+    markerNote: "Encoder–decoder written from the paper",
     stack: ["Python", "JAX", "Flax"],
     github: "https://github.com/Aatman09/Jax_TinyGPT_from_scratch",
     status: "shipped",
@@ -139,6 +163,9 @@ export const projects: Project[] = [
     title: "jax-ml/bonsai — ConvNeXt contribution",
     oneLiner:
       "Ported the ConvNeXt vision architecture to Google's JAX model library, merged after multiple maintainer review rounds.",
+    marker: "#69",
+    markerLabel: "Merged PR",
+    markerNote: "jax-ml/bonsai, after several review rounds",
     stack: ["Python", "JAX", "Flax"],
     github: "https://github.com/jax-ml/bonsai/pull/69",
     status: "shipped",

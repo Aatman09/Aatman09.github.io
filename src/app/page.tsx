@@ -1,119 +1,162 @@
 import Link from "next/link";
-import ProjectCard from "@/components/ProjectCard";
+import ProjectRow from "@/components/ProjectRow";
+import Quantizer from "@/components/Quantizer";
 import { projects } from "@/data/projects";
+import { experience } from "@/data/experience";
 
-const skills = {
-  Languages: ["Python", "C++", "SQL"],
-  "ML / AI Frameworks": [
-    "PyTorch",
-    "JAX",
-    "Flax",
-    "Hugging Face Transformers",
-    "NumPy",
-    "Pandas",
-    "Matplotlib",
-    "KV Caching",
-    "Quantization (int8 / int4)",
-    "Mixed Precision (bf16 / fp16)",
-  ],
-  "Tools & Platforms": [
-    "Git",
-    "Docker",
-    "Linux",
-    "MySQL",
-    "FastAPI",
-    "SQLAlchemy",
-    "Redis",
-  ],
-};
+const stack = [
+  { group: "Languages", items: ["Python", "C++", "SQL"] },
+  {
+    group: "ML / AI",
+    items: [
+      "PyTorch",
+      "JAX",
+      "Flax",
+      "Hugging Face Transformers",
+      "NumPy",
+      "Pandas",
+      "KV caching",
+      "Quantization (int8 / int4)",
+      "Mixed precision (bf16 / fp16)",
+    ],
+  },
+  {
+    group: "Tools",
+    items: [
+      "Git",
+      "Docker",
+      "Linux",
+      "MySQL",
+      "FastAPI",
+      "SQLAlchemy",
+      "Redis",
+    ],
+  },
+];
+
+const contacts = [
+  { href: "https://github.com/Aatman09", label: "GitHub" },
+  {
+    href: "https://www.linkedin.com/in/aatman-soni-045505285/",
+    label: "LinkedIn",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="mx-auto w-full max-w-5xl px-6 py-12 sm:py-20">
+    <div className="mx-auto w-full max-w-[68rem] px-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-white/75 px-7 py-10 shadow-sm sm:px-12 sm:py-14 dark:border-indigo-950 dark:bg-zinc-900/60">
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-indigo-200/50 blur-3xl dark:bg-indigo-700/20" />
-        <div className="relative">
-        <p className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Available for ML opportunities</p>
-        <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.045em] text-zinc-900 sm:text-6xl dark:text-zinc-50">
-          Building ML systems<br className="hidden sm:block" /> that make it to production.
-        </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-          B.Tech CSE student building ML systems that ship and get measured —
-          quantization, document intelligence, and retrieval, not just
-          notebooks.
+      <section className="pt-16 sm:pt-24">
+        <p className="label flex flex-wrap items-center gap-x-3 gap-y-1 text-graphite">
+          <span className="text-ink">Aatman Soni</span>
+          <span aria-hidden="true">/</span>
+          <span>ML systems</span>
+          <span aria-hidden="true">/</span>
+          <span>Ahmedabad, IN</span>
         </p>
-        <div className="mt-8 flex flex-wrap gap-3 text-sm">
+
+        <h1 className="mt-6 max-w-3xl font-display text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.035em] text-ink sm:text-[4rem]">
+          Built from scratch.
+          <br />
+          Measured against the alternative.
+        </h1>
+
+        <p className="mt-7 max-w-xl text-[1.0625rem] leading-8 text-ink-2">
+          B.Tech CSE student. I write the implementation — int8 quantization, a
+          KV-cache decoder, an encoder–decoder Transformer — and then run the
+          benchmark that says whether it was worth doing.
+        </p>
+
+        <div className="mt-8 flex flex-wrap items-center gap-3">
           <a
             href="mailto:aatmansoni2006@gmail.com"
-            className="rounded-lg bg-indigo-600 px-4 py-2.5 font-semibold text-white shadow-sm shadow-indigo-500/30 transition hover:bg-indigo-500"
+            className="label bg-ink px-4 py-2.5 text-paper transition-colors hover:bg-accent-text"
           >
-            Get in touch →
+            aatmansoni2006@gmail.com
           </a>
-          <a
-            href="https://www.linkedin.com/in/aatman-soni-045505285/"
-            className="rounded-lg border border-zinc-200 bg-white/70 px-4 py-2.5 font-semibold text-zinc-700 transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-700 dark:hover:text-indigo-400"
-          >
-            LinkedIn
-          </a>
-          <a
-            href="https://github.com/Aatman09"
-            className="rounded-lg border border-zinc-200 bg-white/70 px-4 py-2.5 font-semibold text-zinc-700 transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-700 dark:hover:text-indigo-400"
-          >
-            GitHub
-          </a>
-        </div>
-        </div>
-      </section>
-
-      {/* Skills */}
-      <section className="mt-20">
-        <div className="flex items-baseline justify-between"><h2 className="text-sm font-bold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-500">
-          Toolkit
-        </h2>
-        <span className="text-sm text-zinc-400">What I build with</span></div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          {Object.entries(skills).map(([category, items]) => (
-            <div key={category} className="rounded-2xl border border-zinc-200/80 bg-white/60 p-5 dark:border-zinc-800 dark:bg-zinc-900/45">
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{category}</h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{items.join(" · ")}</p>
-            </div>
+          {contacts.map((c) => (
+            <a
+              key={c.label}
+              href={c.href}
+              className="label border border-rule-strong px-4 py-2.5 text-graphite transition-colors hover:border-ink hover:text-ink"
+            >
+              {c.label}
+            </a>
           ))}
         </div>
       </section>
 
-      {/* Projects */}
-      <section className="mt-20">
-        <div className="flex items-end justify-between gap-4"><div><p className="text-sm font-bold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-500">Selected work</p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Projects with receipts.</h2></div>
-        <span className="hidden text-sm text-zinc-500 sm:block">Implementation, benchmarks, outcomes.</span></div>
-        <div className="mt-7 grid gap-5 sm:grid-cols-2">
+      {/* Signature: the thing the site is arguing, made operable */}
+      <section className="mt-16 sm:mt-20">
+        <Quantizer />
+      </section>
+
+      {/* Work */}
+      <section className="mt-24 sm:mt-28">
+        <div className="flex items-baseline justify-between gap-6 border-b border-ink pb-2.5">
+          <h2 className="label text-ink">Work</h2>
+          <p className="label text-graphite">Value · project · stack</p>
+        </div>
+        <div>
           {projects.map((p) => (
-            <ProjectCard key={p.slug} project={p} />
+            <ProjectRow key={p.slug} project={p} />
           ))}
         </div>
       </section>
 
-      {/* Experience teaser */}
-      <section className="mt-20">
-        <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-500">
+      {/* Experience */}
+      <section className="mt-24 sm:mt-28">
+        <h2 className="label border-b border-ink pb-2.5 text-ink">
           Experience
         </h2>
         <Link
           href="/experience"
-          className="group mt-5 block rounded-2xl border border-zinc-200 bg-zinc-950 p-7 text-white shadow-lg shadow-zinc-300/40 transition hover:-translate-y-1 hover:bg-indigo-950 dark:border-zinc-700 dark:shadow-none"
+          className="group grid grid-cols-1 gap-x-8 gap-y-3 border-b border-rule px-3 py-7 transition-colors hover:bg-surface sm:grid-cols-[9rem_1fr] sm:px-4"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-300">Internship · 2026</p>
-          <h3 className="mt-3 text-xl font-semibold tracking-tight">
-            SilverTouch Technologies — AI/ML Intern
-          </h3>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-300">
-            June – July 2026. Built a production Intelligent Document
-            Processing (Graph RAG) system — section reconstruction, VLM-based
-            entity extraction, and a served API.
-          </p>
-          <span className="mt-5 inline-block text-sm font-semibold text-indigo-300 group-hover:text-white">Read the experience →</span>
+          <p className="label text-graphite">{experience.dates}</p>
+          <div>
+            <div className="flex items-baseline justify-between gap-4">
+              <h3 className="font-display text-lg font-semibold tracking-tight text-ink">
+                {experience.company}
+              </h3>
+              <span
+                aria-hidden="true"
+                className="shrink-0 font-mono text-sm text-graphite transition-transform group-hover:translate-x-1 group-hover:text-accent-text"
+              >
+                →
+              </span>
+            </div>
+            <p className="label mt-1.5 text-graphite">{experience.role}</p>
+            <p className="mt-3 max-w-xl text-[0.9375rem] leading-7 text-ink-2">
+              Contributed to a production Intelligent Document Processing
+              system: section reconstruction on top of PaddleOCR-VL, a
+              vision-language model chosen and served for entity extraction,
+              and an API endpoint moved onto a dedicated inference server.
+            </p>
+          </div>
         </Link>
+      </section>
+
+      {/* Stack */}
+      <section className="mt-24 sm:mt-28">
+        <h2 className="label border-b border-ink pb-2.5 text-ink">Stack</h2>
+        <div className="grid gap-x-10 gap-y-8 pt-7 sm:grid-cols-3">
+          {stack.map((s) => (
+            <div key={s.group}>
+              <h3 className="label text-graphite">{s.group}</h3>
+              <ul className="mt-3 space-y-1.5">
+                {s.items.map((item) => (
+                  <li
+                    key={item}
+                    className="font-mono text-[0.8125rem] leading-6 text-ink-2"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

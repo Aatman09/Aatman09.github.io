@@ -18,103 +18,131 @@ export default async function ProjectPage({
   if (!project) notFound();
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-20">
+    <div className="mx-auto w-full max-w-[68rem] px-6 pt-10 sm:pt-14">
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 transition hover:-translate-x-1 hover:text-indigo-600 dark:hover:text-indigo-400"
+        className="label inline-block text-graphite transition-colors hover:text-ink"
       >
-        ← Back to work
+        ← Work
       </Link>
 
-      <div className="mt-12 flex items-start justify-between gap-3">
-        <h1 className="text-3xl font-semibold tracking-[-0.035em] text-zinc-900 sm:text-5xl dark:text-zinc-50">
-          {project.title}
-        </h1>
-        {project.status === "in-progress" && (
-          <span className="mt-1 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-            in progress
-          </span>
-        )}
-      </div>
+      <header className="mt-12 grid grid-cols-1 gap-x-10 gap-y-6 border-b border-ink pb-9 sm:grid-cols-[9rem_1fr]">
+        <div>
+          <p className="font-display text-4xl font-semibold leading-none tracking-tight text-accent-text sm:text-[2.75rem]">
+            {project.marker}
+          </p>
+          <p className="label mt-2 text-graphite">{project.markerLabel}</p>
+        </div>
 
-      <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-        {project.oneLiner}
-      </p>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        {project.stack.map((s) => (
-          <span
-            key={s}
-            className="rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-          >
-            {s}
-          </span>
-        ))}
-      </div>
-
-      {project.github && (
-        <a
-          href={project.github}
-          className="mt-7 inline-flex rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/30 transition hover:bg-indigo-500"
-        >
-          View on GitHub →
-        </a>
-      )}
+        <div className="min-w-0">
+          <h1 className="font-display text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[2.75rem]">
+            {project.title}
+          </h1>
+          <p className="mt-5 max-w-2xl text-[1.0625rem] leading-8 text-ink-2">
+            {project.oneLiner}
+          </p>
+          <p className="label mt-5 text-graphite">
+            {project.stack.join(" · ")}
+            {project.status === "in-progress" && (
+              <span className="ml-3 text-accent-text">In progress</span>
+            )}
+          </p>
+          {project.github && (
+            <a
+              href={project.github}
+              className="label mt-6 inline-block border border-rule-strong px-4 py-2.5 text-graphite transition-colors hover:border-ink hover:text-ink"
+            >
+              Open on GitHub
+            </a>
+          )}
+        </div>
+      </header>
 
       {project.resultsTable && (
-        <div className="mt-10 overflow-x-auto rounded-2xl border border-zinc-200 bg-white/70 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
-                {project.resultsTable.headers.map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-2 text-left font-medium text-zinc-700 dark:text-zinc-300"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {project.resultsTable.rows.map((row, i) => (
-                <tr
-                  key={i}
-                  className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60"
-                >
-                  {row.map((cell, j) => (
-                    <td
-                      key={j}
-                      className="px-4 py-2 text-zinc-700 dark:text-zinc-300"
+        <section className="mt-12">
+          <h2 className="label border-b border-rule pb-2.5 text-ink">
+            Results
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="tnum w-full min-w-[34rem] border-collapse font-mono text-sm">
+              <thead>
+                <tr>
+                  {project.resultsTable.headers.map((h, i) => (
+                    <th
+                      key={h}
+                      scope="col"
+                      className={`label border-b border-rule px-3 py-3 font-normal text-graphite ${
+                        i === 0 ? "text-left" : "text-right"
+                      }`}
                     >
-                      {cell}
-                    </td>
+                      {h}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {project.resultsTable.rows.map((row, i) => {
+                  const mine = project.resultsTable?.highlightRow === i;
+                  return (
+                    <tr key={i} className={mine ? "bg-signal-soft" : undefined}>
+                      {row.map((cell, j) => (
+                        <td
+                          key={j}
+                          className={`border-b border-rule px-3 py-3 ${
+                            j === 0
+                              ? "text-left text-ink"
+                              : "text-right text-ink-2"
+                          } ${mine ? "text-ink" : ""}`}
+                        >
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
-      <div className="mt-14 space-y-10">
-        {project.deepDive.map((section) => (
-          <section key={section.heading}>
-            <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-              {section.heading}
-            </h2>
-            <div className="mt-2 space-y-3">
-              {section.body.map((para, i) => (
-                <p
-                  key={i}
-                  className="text-sm leading-7 text-zinc-700 dark:text-zinc-300"
-                >
-                  {para}
-                </p>
-              ))}
-            </div>
-          </section>
-        ))}
+      <div className="mt-14 max-w-[44rem]">
+        {project.deepDive.map((section) =>
+          section.tone === "limits" ? (
+            <section
+              key={section.heading}
+              className="mt-12 border-l-2 border-signal bg-surface px-6 py-7"
+            >
+              <h2 className="label text-accent-text">Known limits</h2>
+              <h3 className="mt-3 font-display text-lg font-semibold tracking-tight text-ink">
+                {section.heading}
+              </h3>
+              <ul className="mt-4 space-y-2.5">
+                {section.body.map((para, i) => (
+                  <li key={i} className="text-[0.9375rem] leading-7 text-ink-2">
+                    {para}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : (
+            <section
+              key={section.heading}
+              className="border-t border-rule py-9 first:border-t-0 first:pt-0"
+            >
+              <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+                {section.heading}
+              </h2>
+              <div className="mt-4 space-y-4">
+                {section.body.map((para, i) => (
+                  <p key={i} className="text-[0.9375rem] leading-7 text-ink-2">
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </section>
+          ),
+        )}
       </div>
     </div>
   );

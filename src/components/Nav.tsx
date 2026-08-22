@@ -2,27 +2,33 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const links = [
-  { href: "/", label: "Home" },
+  { href: "/", label: "Work" },
   { href: "/experience", label: "Experience" },
 ];
 
 export default function Nav() {
   return (
-    <header className="sticky top-0 z-20 border-b border-zinc-200/80 bg-white/75 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/75">
-      <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+    <header className="sticky top-0 z-20 border-b border-rule bg-paper/85 backdrop-blur-md">
+      <nav className="mx-auto flex max-w-[68rem] items-center justify-between px-6 py-3.5">
         <Link
           href="/"
-          className="group flex items-center gap-2 font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
+          className="flex items-center gap-2.5 font-display text-[0.9375rem] font-semibold tracking-tight text-ink"
         >
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-indigo-600 text-xs font-bold text-white shadow-sm shadow-indigo-500/30 transition-transform group-hover:-rotate-6">AS</span>
+          <span
+            aria-hidden="true"
+            className="grid h-6 w-6 place-items-center bg-ink font-mono text-[0.625rem] font-semibold text-paper"
+          >
+            AS
+          </span>
           Aatman Soni
         </Link>
-        <div className="flex items-center gap-4 text-sm font-medium text-zinc-600 dark:text-zinc-400 sm:gap-6">
+
+        <div className="flex items-center gap-5 sm:gap-7">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
+              className="label text-graphite transition-colors hover:text-ink"
             >
               {l.label}
             </Link>

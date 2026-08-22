@@ -7,40 +7,45 @@ export const metadata = {
 
 export default function ExperiencePage() {
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-20">
+    <div className="mx-auto w-full max-w-[68rem] px-6 pt-10 sm:pt-14">
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 transition hover:-translate-x-1 hover:text-indigo-600 dark:hover:text-indigo-400"
+        className="label inline-block text-graphite transition-colors hover:text-ink"
       >
-        ← Back to work
+        ← Work
       </Link>
 
-      <p className="mt-12 text-xs font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-400">Experience</p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-zinc-900 sm:text-5xl dark:text-zinc-50">
-        {experience.company}
-      </h1>
-      <p className="mt-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-        {experience.role} · {experience.location} · {experience.dates}
-      </p>
-      <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-        {experience.summary}
-      </p>
+      <header className="mt-12 border-b border-ink pb-8">
+        <p className="label text-graphite">{experience.dates}</p>
+        <h1 className="mt-4 max-w-3xl font-display text-[2.25rem] font-semibold leading-[1.08] tracking-[-0.03em] text-ink sm:text-[3.25rem]">
+          {experience.company}
+        </h1>
+        <p className="label mt-4 text-accent-text">
+          {experience.role} · {experience.location}
+        </p>
+        <p className="mt-6 max-w-2xl text-[1.0625rem] leading-8 text-ink-2">
+          {experience.summary}
+        </p>
+      </header>
 
-      <div className="mt-14 space-y-10 border-l border-indigo-200 pl-6 dark:border-indigo-900 sm:pl-9">
+      <div>
         {experience.sections.map((section) => (
-          <section key={section.heading}>
-            <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-              {section.heading}
-            </h2>
-            <div className="mt-2 space-y-3">
-              {section.body.map((para, i) => (
-                <p
-                  key={i}
-                  className="text-sm leading-7 text-zinc-700 dark:text-zinc-300"
-                >
-                  {para}
-                </p>
-              ))}
+          <section
+            key={section.heading}
+            className="grid grid-cols-1 gap-x-10 gap-y-3 border-b border-rule py-10 sm:grid-cols-[9rem_1fr]"
+          >
+            <h2 className="label text-graphite sm:pt-1.5">{section.label}</h2>
+            <div className="min-w-0">
+              <h3 className="max-w-2xl font-display text-xl font-semibold tracking-tight text-ink">
+                {section.heading}
+              </h3>
+              <div className="mt-4 max-w-2xl space-y-4">
+                {section.body.map((para, i) => (
+                  <p key={i} className="text-[0.9375rem] leading-7 text-ink-2">
+                    {para}
+                  </p>
+                ))}
+              </div>
             </div>
           </section>
         ))}

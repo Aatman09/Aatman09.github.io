@@ -7,12 +7,14 @@ export const experience = {
     "An 8-week internship contributing to a production Intelligent Document Processing (Graph RAG) system — the kind of shipped, measured, deployed work that a research-leaning portfolio was missing.",
   sections: [
     {
+      label: "Layout",
       heading: "Document layout analysis & OCR",
       body: [
         "PaddleOCR-VL extracts text as flat, unstructured blocks with no concept of sections or nesting. Built a section-reconstruction pipeline on top of PaddleOCR-VL to recover that missing structure: a multi-stage algorithm that peels off headers, footers, and standalone visual blocks (tables, images, figures) first, then detects multi-column layouts by walking blocks left-to-right and watching for real gutters versus normal word spacing, merges the remaining text blocks vertically within each column using a gap threshold that adapts to the column's own font size, and finally assembles everything into a single reading-ordered sequence of sections.",
       ],
     },
     {
+      label: "Retrieval",
       heading: "Intelligent Document Processing — Graph RAG system",
       body: [
         "The team's existing IDP system uses a graph rather than flat chunks so that it can answer questions spanning distant parts of a document — a clause on page 1 referencing a party defined on page 47, for instance: positional edges connect blocks by sequence and layout, and an LLM pass over each block extracts semantic edges (is_owner_of, works_at, and similar relationships) between the entities it mentions.",
