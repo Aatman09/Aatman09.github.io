@@ -18,16 +18,16 @@ export default async function ProjectPage({
   if (!project) notFound();
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 py-16">
+    <div className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-20">
       <Link
         href="/"
-        className="text-sm text-zinc-500 underline underline-offset-4 hover:text-zinc-900 dark:hover:text-zinc-200"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 transition hover:-translate-x-1 hover:text-indigo-600 dark:hover:text-indigo-400"
       >
-        ← Back
+        ← Back to work
       </Link>
 
-      <div className="mt-4 flex items-start justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
+      <div className="mt-12 flex items-start justify-between gap-3">
+        <h1 className="text-3xl font-semibold tracking-[-0.035em] text-zinc-900 sm:text-5xl dark:text-zinc-50">
           {project.title}
         </h1>
         {project.status === "in-progress" && (
@@ -37,7 +37,7 @@ export default async function ProjectPage({
         )}
       </div>
 
-      <p className="mt-2 max-w-xl text-zinc-600 dark:text-zinc-400">
+      <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-400">
         {project.oneLiner}
       </p>
 
@@ -45,7 +45,7 @@ export default async function ProjectPage({
         {project.stack.map((s) => (
           <span
             key={s}
-            className="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+            className="rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
           >
             {s}
           </span>
@@ -55,14 +55,14 @@ export default async function ProjectPage({
       {project.github && (
         <a
           href={project.github}
-          className="mt-4 inline-block text-sm text-zinc-900 underline underline-offset-4 dark:text-zinc-50"
+          className="mt-7 inline-flex rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/30 transition hover:bg-indigo-500"
         >
           View on GitHub →
         </a>
       )}
 
       {project.resultsTable && (
-        <div className="mt-8 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+        <div className="mt-10 overflow-x-auto rounded-2xl border border-zinc-200 bg-white/70 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
@@ -97,17 +97,17 @@ export default async function ProjectPage({
         </div>
       )}
 
-      <div className="mt-10 space-y-8">
+      <div className="mt-14 space-y-10">
         {project.deepDive.map((section) => (
           <section key={section.heading}>
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
               {section.heading}
             </h2>
             <div className="mt-2 space-y-3">
               {section.body.map((para, i) => (
                 <p
                   key={i}
-                  className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
+                  className="text-sm leading-7 text-zinc-700 dark:text-zinc-300"
                 >
                   {para}
                 </p>

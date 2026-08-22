@@ -8,20 +8,21 @@ const links = [
 
 export default function Nav() {
   return (
-    <header className="border-b border-zinc-200 dark:border-zinc-800">
-      <nav className="mx-auto flex max-w-3xl items-center justify-between px-6 py-5">
+    <header className="sticky top-0 z-20 border-b border-zinc-200/80 bg-white/75 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/75">
+      <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
         <Link
           href="/"
-          className="font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
+          className="group flex items-center gap-2 font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
         >
+          <span className="grid h-7 w-7 place-items-center rounded-lg bg-indigo-600 text-xs font-bold text-white shadow-sm shadow-indigo-500/30 transition-transform group-hover:-rotate-6">AS</span>
           Aatman Soni
         </Link>
-        <div className="flex items-center gap-6 text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="flex items-center gap-4 text-sm font-medium text-zinc-600 dark:text-zinc-400 sm:gap-6">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="transition-colors hover:text-zinc-900 dark:hover:text-zinc-50"
+              className="transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
             >
               {l.label}
             </Link>
