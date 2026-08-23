@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Quantizer from "@/components/Quantizer";
 import { projects, getProject } from "@/data/projects";
 
 export function generateStaticParams() {
@@ -61,8 +62,25 @@ export default async function ProjectPage({
         </div>
       </header>
 
+      {project.figure === "quantizer" && (
+        <section className="mt-14">
+          <div className="max-w-2xl">
+            <h2 className="label text-graphite">How it works</h2>
+            <p className="mt-3 text-[1.0625rem] leading-8 text-ink-2">
+              Quantization makes a model smaller by storing each weight at lower
+              precision. The only question worth asking is what that costs.
+              Below is a weight distribution and the same weights snapped to an
+              integer grid — switch the precision to watch the error open up.
+            </p>
+          </div>
+          <div className="mt-8">
+            <Quantizer />
+          </div>
+        </section>
+      )}
+
       {project.resultsTable && (
-        <section className="mt-12">
+        <section className="mt-14">
           <h2 className="label border-b border-rule pb-2.5 text-ink">
             Results
           </h2>

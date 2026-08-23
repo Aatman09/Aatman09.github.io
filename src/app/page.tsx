@@ -1,6 +1,5 @@
 import Link from "next/link";
 import ProjectRow from "@/components/ProjectRow";
-import Quantizer from "@/components/Quantizer";
 import { projects } from "@/data/projects";
 import { experience } from "@/data/experience";
 
@@ -84,11 +83,6 @@ export default function Home() {
             </a>
           ))}
         </div>
-      </section>
-
-      {/* Signature: the thing the site is arguing, made operable */}
-      <section className="mt-16 sm:mt-20">
-        <Quantizer />
       </section>
 
       {/* Work */}

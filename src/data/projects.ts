@@ -14,6 +14,8 @@ export type Project = {
   stack: string[];
   github?: string;
   status: "shipped" | "in-progress";
+  /** Renders the interactive quantizer figure on this project's page. */
+  figure?: "quantizer";
   cardBullets: string[];
   deepDive: {
     heading: string;
@@ -41,6 +43,7 @@ export const projects: Project[] = [
     stack: ["Python", "PyTorch", "Hugging Face Transformers", "FastAPI"],
     github: "https://github.com/Aatman09/gemma2-quant-serve",
     status: "shipped",
+    figure: "quantizer",
     cardBullets: [
       "Per-channel symmetric int8 quantization written from scratch — no bitsandbytes in the core path.",
       "Beats bitsandbytes on quality (12.53 vs 12.70 perplexity) while trading some memory savings (-27% vs -39%).",

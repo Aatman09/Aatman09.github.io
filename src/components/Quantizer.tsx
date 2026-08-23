@@ -52,7 +52,12 @@ const PX_PER_UNIT = MAIN_H / 2 / VRANGE;
 
 const vToPy = (v: number) => MAIN_CY - v * PX_PER_UNIT;
 
-type Precision = { id: string; label: string; bits: number | null; note: string };
+type Precision = {
+  id: string;
+  label: string;
+  bits: number | null;
+  note: string;
+};
 
 const PRECISIONS: Precision[] = [
   {
@@ -111,7 +116,8 @@ export default function Quantizer() {
     const delta = AMAX / qmax;
     let maxError = 0;
     const quantized = SAMPLES.map((s) => {
-      const q = Math.max(-qmax, Math.min(qmax, Math.round(s.v / delta))) * delta;
+      const q =
+        Math.max(-qmax, Math.min(qmax, Math.round(s.v / delta))) * delta;
       maxError = Math.max(maxError, Math.abs(s.v - q));
       return q;
     });
@@ -186,10 +192,23 @@ export default function Quantizer() {
 
   return (
     <figure className="m-0">
-      <figcaption className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-rule pb-2.5">
+      <figcaption className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-rule pb-2.5">
         <span className="label text-ink">Quantization grid</span>
-        <span className="label text-graphite">
-          Symmetric · per-tensor · round-to-nearest
+        <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <span className="label flex items-center gap-2 text-graphite">
+            <span
+              aria-hidden="true"
+              className="inline-block h-0 w-5 border-t-2 border-graphite"
+            />
+            Original weights
+          </span>
+          <span className="label flex items-center gap-2 text-graphite">
+            <span
+              aria-hidden="true"
+              className="inline-block h-0 w-5 border-t-2 border-signal"
+            />
+            Quantized
+          </span>
         </span>
       </figcaption>
 
@@ -268,9 +287,7 @@ export default function Quantizer() {
             letterSpacing="0.13em"
             style={{ fontFamily: "var(--font-plex-mono), monospace" }}
           >
-            {quantized
-              ? `RESIDUAL  ×${model.gain}`
-              : "RESIDUAL  —  REFERENCE"}
+            {quantized ? `RESIDUAL  ×${model.gain}` : "RESIDUAL  —  REFERENCE"}
           </text>
           <line
             x1={PAD_X}
@@ -320,29 +337,34 @@ export default function Quantizer() {
 
       {/* Controls + live readout */}
       <div className="flex flex-col gap-4 border-x border-b border-rule bg-surface-2 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-        <div
-          role="group"
-          aria-label="Weight precision"
-          className="flex w-fit border border-rule-strong"
-        >
-          {PRECISIONS.map((p) => {
-            const active = p.id === precision.id;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setPrecisionId(p.id)}
-                className={`label px-3.5 py-2 transition-colors ${
-                  active
-                    ? "bg-ink text-paper"
-                    : "text-graphite hover:bg-surface hover:text-ink"
-                }`}
-              >
-                {p.label}
-              </button>
-            );
-          })}
+        <div>
+          <p className="label mb-2 text-graphite" id="precision-label">
+            Weight precision
+          </p>
+          <div
+            role="group"
+            aria-labelledby="precision-label"
+            className="flex w-fit border border-rule-strong"
+          >
+            {PRECISIONS.map((p) => {
+              const active = p.id === precision.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setPrecisionId(p.id)}
+                  className={`label px-3.5 py-2 transition-colors ${
+                    active
+                      ? "bg-ink text-paper"
+                      : "text-graphite hover:bg-surface hover:text-ink"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <dl className="tnum grid grid-cols-3 gap-x-6 gap-y-1 font-mono text-sm text-ink sm:gap-x-9 sm:text-right">
@@ -358,13 +380,18 @@ export default function Quantizer() {
           </div>
           <div>
             <dt className="label text-graphite">Max error</dt>
-            <dd className="mt-1 text-accent-text">{model.maxError.toFixed(4)}</dd>
+            <dd className="mt-1 text-accent-text">
+              {model.maxError.toFixed(4)}
+            </dd>
           </div>
         </dl>
       </div>
 
       <p className="mt-3 max-w-2xl font-mono text-xs leading-6 text-graphite">
         {precision.note}
+      </p>
+      <p className="label mt-2 text-graphite">
+        Symmetric · per-tensor · round-to-nearest
       </p>
     </figure>
   );
