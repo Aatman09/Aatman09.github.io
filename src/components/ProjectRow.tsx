@@ -44,6 +44,9 @@ export default function ProjectRow({ project }: { project: Project }) {
 
         <p className="label mt-4 text-graphite">
           {project.stack.join(" · ")}
+          {project.live && (
+            <span className="ml-3 text-accent-text">Live</span>
+          )}
           {project.status === "in-progress" && (
             <span className="ml-3 text-accent-text">In progress</span>
           )}

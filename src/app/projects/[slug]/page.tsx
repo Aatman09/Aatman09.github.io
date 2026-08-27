@@ -51,13 +51,25 @@ export default async function ProjectPage({
               <span className="ml-3 text-accent-text">In progress</span>
             )}
           </p>
-          {project.github && (
-            <a
-              href={project.github}
-              className="label mt-6 inline-block border border-rule-strong px-4 py-2.5 text-graphite transition-colors hover:border-ink hover:text-ink"
-            >
-              Open on GitHub
-            </a>
+          {(project.live || project.github) && (
+            <div className="mt-6 flex flex-wrap gap-3">
+              {project.live && (
+                <a
+                  href={project.live}
+                  className="label inline-block border border-ink bg-ink px-4 py-2.5 text-paper transition-opacity hover:opacity-80"
+                >
+                  Open the live app
+                </a>
+              )}
+              {project.github && (
+                <a
+                  href={project.github}
+                  className="label inline-block border border-rule-strong px-4 py-2.5 text-graphite transition-colors hover:border-ink hover:text-ink"
+                >
+                  Open on GitHub
+                </a>
+              )}
+            </div>
           )}
         </div>
       </header>

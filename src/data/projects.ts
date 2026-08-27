@@ -13,6 +13,8 @@ export type Project = {
   markerNote?: string;
   stack: string[];
   github?: string;
+  /** A deployed, publicly reachable instance. Outranks the repo link when present. */
+  live?: string;
   status: "shipped" | "in-progress";
   /** Renders the interactive quantizer figure on this project's page. */
   figure?: "quantizer";
@@ -32,6 +34,118 @@ export type Project = {
 };
 
 export const projects: Project[] = [
+  {
+    slug: "cachegpt",
+    title: "CacheGPT",
+    oneLiner:
+      "GPT-2 trained from scratch, served through a hand-written KV cache, instruction-tuned with LoRA, and deployed live on a CPU-only box.",
+    marker: "10.2×",
+    markerLabel: "Faster decode",
+    markerNote: "171.6 → 16.8 ms/token at 84-token context",
+    stack: [
+      "Python",
+      "PyTorch",
+      "PEFT",
+      "FastAPI",
+      "PostgreSQL",
+      "React",
+      "Docker",
+      "AWS",
+    ],
+    github: "https://github.com/Aatman09/gpt2-inference-engine",
+    live: "https://cachegpt.duckdns.org",
+    status: "shipped",
+    cardBullets: [
+      "Hand-written KV cache cutting decode from 171.6 to 16.8 ms/token — exposed as a live toggle so the difference is visible, not asserted.",
+      "Instruction-tuned GPT-2-medium with LoRA into a 4.7 MB adapter training 0.29% of the weights.",
+      "Deployed on a 2 vCPU / 4 GB EC2 box with no GPU, after shrinking the Docker image from 15.8 GB to 2.76 GB.",
+    ],
+    deepDive: [
+      {
+        heading: "The cache is the product",
+        body: [
+          "Naive generation re-runs the whole sequence through every transformer block on every new token: at step t it recomputes K and V for all t past tokens, none of which changed. Caching them per layer means each decode step does one token's worth of attention work, turning quadratic per-step cost into linear.",
+          "Two details decide whether the implementation is correct rather than merely fast. is_causal is computed dynamically from q.shape[2] == k.shape[2], so the same forward pass serves both a multi-token prefill and a single-token decode without a separate code path — during decode the lone query attends to all past keys and needs no mask at all. And position ids continue from past_length, or the position embedding table resets to zero every step and the model loses track of where it is.",
+          "Measured on this machine: 16.8 ms/token cached, against 171.6 ms/token running the naive full-sequence path at an 84-token context. The app ships both and lets you switch between them mid-conversation, which is the only honest way to present a speedup.",
+        ],
+      },
+      {
+        heading: "Making a base model answer questions",
+        body: [
+          "GPT-2 is a base model: it continues text rather than responding to it, so as a chat product it looks broken. LoRA fixes that without touching the 406M frozen weights — a rank decomposition on the attention projections, trained on databricks-dolly-15k, producing a 4.7 MB adapter of 1.18M trainable parameters (0.29% of the model).",
+          "Response-only loss masking matters more than it sounds: the model should learn to produce the answer, not to reproduce the prompt. The prompt format lives in one module shared by training and serving, so the two cannot silently drift apart — a mismatch there produces a model that scores well during training and behaves strangely in production.",
+        ],
+      },
+      {
+        heading: "Shipping it somewhere real",
+        body: [
+          "Three backends sit behind one interface: the hand-written engine and two off-the-shelf instruct models (Qwen2.5-0.5B, SmolLM2-360M). The generate route depends only on that interface and has no idea which is underneath, which is what makes switching models, toggling the cache, and swapping adapters all the same kind of operation.",
+          "The deploy is a single container on an EC2 t3.medium — 2 vCPU, 4 GB, no GPU — behind nginx with TLS. Getting there meant cutting the image from 15.8 GB to 2.76 GB, because the default PyTorch wheel bundles CUDA runtime libraries whether or not a GPU exists; a CPU-only wheel index behind a uv extra removes about 13 GB of dead weight.",
+          "Streaming runs the CPU-bound generator on a worker thread and hands tokens to the async side through a queue, so the event loop stays free to flush each frame as it is produced. Per-token latency and throughput are computed live and persisted with the conversation, so reloading a chat shows the same numbers it showed while streaming.",
+        ],
+      },
+      {
+        heading: "Honest limitations",
+        tone: "limits",
+        body: [
+          "Speculative decoding and INT8 quantization are designed and baselined (16.8 ms/token fp32, 10.5 ms/token INT8 measured) but not implemented.",
+          "No continuous batching or request scheduler — batch size is hardcoded to 1 everywhere in the serving path.",
+          "The adapter was trained entirely on single-turn data and occasionally pulls context from unrelated earlier turns. Reproduced systematically (1 in 6 seeds with contaminating history, 0 in 6 without) rather than left as an anecdote; the fix needs multi-turn training data.",
+          "A single JWT access token with no refresh rotation — a deliberate scope cut for a demo app, not production auth.",
+        ],
+      },
+    ],
+    resultsTable: {
+      headers: ["Decode path", "ms / token", "Relative"],
+      highlightRow: 1,
+      rows: [
+        ["Naive full-sequence (T=84)", "171.6", "10.2× slower"],
+        ["KV cache (fp32)", "16.8", "baseline"],
+        ["INT8 quantized — measured, not shipped", "10.5", "1.6× faster"],
+      ],
+    },
+  },
+  {
+    slug: "doc-tree",
+    title: "doc_tree",
+    oneLiner:
+      "Rebuilds a document's section hierarchy from the flat block list an OCR model outputs — one pass, no ML.",
+    marker: "O(n)",
+    markerLabel: "Single pass",
+    markerNote: "No model inference · 48-case test suite",
+    stack: ["Python"],
+    github: "https://github.com/Aatman09/doc_tree",
+    status: "shipped",
+    cardBullets: [
+      "PaddleOCR-VL detects where things are but not what owns what — doc_tree recovers the section tree it never produces.",
+      "Heading-type detection, dotted-number parsing and a stack. Deterministic, linear, and no model in the loop.",
+      "Section-level chunking means retrieval returns a whole subsection instead of a fragment starting mid-sentence.",
+    ],
+    deepDive: [
+      {
+        heading: "The gap it fills",
+        body: [
+          "PaddleOCR-VL does layout detection: it tells you a block is a paragraph title, a table, a figure, and where it sits on the page. It does not tell you that 3.2.2 Multi-Head Attention lives inside 3.2 Attention, because reconstructing structure is a different problem from detecting it.",
+          "Everything downstream pays for that missing hierarchy. Fixed-size chunkers slice sections in half and orphan subsections from their parents. Tables and figures lose the section they belong to, so 'which section is this table in' has no answer. Markdown generated from flat blocks is a wall of undifferentiated headings.",
+        ],
+      },
+      {
+        heading: "How it works",
+        body: [
+          "Detection runs in priority order. Only blocks already typed as headings are considered. A leading dotted number gives the depth directly — 3.2.5 is level three, dots plus one. Unnumbered headings matching known front and back matter (Abstract, References, Appendix, Index) are treated as level one. Anything left falls to a pluggable classifier using line height relative to the document median, so a project with real typography information can swap in something better without touching the rest.",
+          "The builder then walks blocks in reading order against a stack, popping until it finds the right parent and pushing each new section. Non-heading blocks attach to whatever section is currently open. Each section ends up carrying its own heading box plus the recursive union of everything it owns, with a per-page footprint for sections spanning multiple pages.",
+        ],
+      },
+      {
+        heading: "The two decisions that make it survive real scans",
+        body: [
+          "A synthetic root at level zero. Front matter before the first heading, and the document title itself, belong to the root rather than leaking out or forcing an artificial section. Every block is guaranteed exactly one owner.",
+          "Level clamping. A new heading's depth is bounded to its parent's depth plus one and floored at one. That single rule roots a partial extraction at level one, caps runaway nesting from an OCR'd 1.1.1.1.1, and keeps the tree valid when intermediate numbering is missing entirely.",
+          "Separately, repeating page furniture — running headers and footers, page numbers, logos — attaches nowhere at all. This came out of a real failure: a running header sitting above a real heading bound itself to whatever section was still open from the previous page, and one attached to List of Figures across a chapter divider dragged that section's bounding box onto the next chapter.",
+        ],
+      },
+    ],
+  },
   {
     slug: "gemma2-quant",
     title: "gemma2-quant",
@@ -92,44 +206,6 @@ export const projects: Project[] = [
         ["bitsandbytes int8", "2.98 GB", "-39%", "12.70", "+1.93%"],
       ],
     },
-  },
-  {
-    slug: "achat",
-    title: "achat",
-    oneLiner:
-      "GPT-2 built by hand in PyTorch, trained on FineWeb, and extended with a from-scratch KV-cache inference engine.",
-    marker: "3.0×",
-    markerLabel: "Faster step",
-    markerNote: "15s → under 5s per step on one RTX 4050",
-    stack: ["Python", "PyTorch", "CUDA", "tiktoken", "FastAPI", "React"],
-    github: "https://github.com/Aatman09/achat",
-    status: "shipped",
-    cardBullets: [
-      "12-layer, 768-dim GPT-2 written from scratch, weights loaded from Hugging Face with the required transpose mapping.",
-      "Custom KV-cache engine threading cache state through every transformer block — quadratic per-step decode becomes linear.",
-      "bfloat16 autocast, gradient accumulation, and torch.compile cut per-step training time from 15s to under 5s on an RTX 4050.",
-    ],
-    deepDive: [
-      {
-        heading: "The KV cache, in one paragraph",
-        body: [
-          "Naive generation re-runs the full sequence through every transformer block on every new token: at step t, K and V get recomputed for all t past tokens, even though none of them changed. KV caching saves K and V per layer once they're computed, so each decode step only does one new token's worth of attention work — quadratic per-step cost becomes linear.",
-          "In model_kv.py, the cache is a list of (k, v) tensors, one per block. On the first call the prefill runs normally and the returned caches are the K/V for every block; on each decode call, a single new token plus the cache goes in, and each block concatenates the new K/V onto the past and returns the updated cache. is_causal is only set to True when q.shape[2] == k.shape[2] (prefill) — during decode the lone query attends to all past keys with no mask needed. Position IDs are continued from past_length so wpe (the position embedding table) doesn't reset to zero on every decode step.",
-        ],
-      },
-      {
-        heading: "Training",
-        body: [
-          "Trained on FineWeb shards using bfloat16 autocast, gradient accumulation, gradient-norm clipping, and torch.compile — bringing per-step time from 15s down to under 5s (roughly 3×) on a single RTX 4050.",
-        ],
-      },
-      {
-        heading: "What's in the repo",
-        body: [
-          "train.py handles pretraining on FineWeb shards. model_kv.py is the from-scratch GPT-2 with KV cache plumbed through attention, block, and the full model. inference_kv.py runs cached generation against a fine-tuned Shakespeare checkpoint. A FastAPI backend wraps the model behind a /predict endpoint, with a small React chat frontend on top.",
-        ],
-      },
-    ],
   },
   {
     slug: "jax-transformer",
