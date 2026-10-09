@@ -35,10 +35,20 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const description =
+  "B.Tech CSE student building ML systems from scratch and measuring them — int8 quantization, KV-cache decoding, and document-graph retrieval.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://aatman09.github.io"),
   title: "Aatman Soni",
-  description:
-    "B.Tech CSE student building ML systems from scratch and measuring them — int8 quantization, KV-cache decoding, and document-graph retrieval.",
+  description,
+  openGraph: {
+    title: "Aatman Soni — ML systems",
+    description,
+    url: "/",
+    siteName: "Aatman Soni",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

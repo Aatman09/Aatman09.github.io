@@ -3,8 +3,14 @@ import ProjectRow from "@/components/ProjectRow";
 import { projects } from "@/data/projects";
 import { experience } from "@/data/experience";
 
+// Empty fields are left out of the hero.
+const education = {
+  university: "",
+  classOf: "",
+};
+
 const stack = [
-  { group: "Languages", items: ["Python", "C++", "SQL"] },
+  { group: "Languages", items: ["Python", "C++", "SQL", "TypeScript"] },
   {
     group: "ML / AI",
     items: [
@@ -12,11 +18,11 @@ const stack = [
       "JAX",
       "Flax",
       "Hugging Face Transformers",
+      "PEFT / LoRA",
       "NumPy",
       "Pandas",
-      "KV caching",
-      "Quantization (int8 / int4)",
-      "Mixed precision (bf16 / fp16)",
+      "vLLM",
+      "llama.cpp",
     ],
   },
   {
@@ -25,10 +31,13 @@ const stack = [
       "Git",
       "Docker",
       "Linux",
-      "MySQL",
+      "AWS EC2",
+      "PostgreSQL",
       "FastAPI",
       "SQLAlchemy",
       "Redis",
+      "React",
+      "Next.js",
     ],
   },
 ];
@@ -53,6 +62,20 @@ export default function Home() {
           <span aria-hidden="true">/</span>
           <span>Ahmedabad, IN</span>
         </p>
+        <p className="label mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-graphite">
+          <span>
+            B.Tech CSE
+            {education.university && ` · ${education.university}`}
+          </span>
+          <span aria-hidden="true">/</span>
+          {education.classOf && (
+            <>
+              <span>Class of {education.classOf}</span>
+              <span aria-hidden="true">/</span>
+            </>
+          )}
+          <span className="text-accent-text">Seeking ML / SDE internships</span>
+        </p>
 
         <h1 className="mt-6 max-w-3xl font-display text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.035em] text-ink sm:text-[4rem]">
           Built from scratch.
@@ -61,9 +84,9 @@ export default function Home() {
         </h1>
 
         <p className="mt-7 max-w-xl text-[1.0625rem] leading-8 text-ink-2">
-          B.Tech CSE student. I write the implementation — int8 quantization, a
-          KV-cache decoder, an encoder–decoder Transformer — and then run the
-          benchmark that says whether it was worth doing.
+          I write the implementation — int8 quantization, a
+          KV-cache decoder, a ConvNeXt port merged into jax-ml — and then run
+          the benchmark that says whether it was worth doing.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-3">

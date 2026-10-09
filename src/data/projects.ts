@@ -18,6 +18,9 @@ export type Project = {
   status: "shipped" | "in-progress";
   /** Renders the interactive quantizer figure on this project's page. */
   figure?: "quantizer";
+  /** A screenshot or recording shown under the header. Path is under public/. */
+  media?: { src: string; alt: string; caption?: string };
+  /** Rendered as the TL;DR at the top of the project page. */
   cardBullets: string[];
   deepDive: {
     heading: string;
@@ -88,7 +91,7 @@ export const projects: Project[] = [
         heading: "Honest limitations",
         tone: "limits",
         body: [
-          "Speculative decoding and INT8 quantization are designed and baselined (16.8 ms/token fp32, 10.5 ms/token INT8 measured) but not implemented.",
+          "INT8 was measured in a standalone prototype script (10.5 ms/token against 16.8 fp32) but is not integrated into the serving path. Speculative decoding is designed, not implemented.",
           "No continuous batching or request scheduler — batch size is hardcoded to 1 everywhere in the serving path.",
           "The adapter was trained entirely on single-turn data and occasionally pulls context from unrelated earlier turns. Reproduced systematically (1 in 6 seeds with contaminating history, 0 in 6 without) rather than left as an anecdote; the fix needs multi-turn training data.",
           "A single JWT access token with no refresh rotation — a deliberate scope cut for a demo app, not production auth.",
@@ -101,59 +104,18 @@ export const projects: Project[] = [
       rows: [
         ["Naive full-sequence (T=84)", "171.6", "10.2× slower"],
         ["KV cache (fp32)", "16.8", "baseline"],
-        ["INT8 quantized — measured, not shipped", "10.5", "1.6× faster"],
+        ["INT8 — prototype script, not in app", "10.5", "1.6× faster"],
       ],
     },
-  },
-  {
-    slug: "doc-tree",
-    title: "doc_tree",
-    oneLiner:
-      "Rebuilds a document's section hierarchy from the flat block list an OCR model outputs — one pass, no ML.",
-    marker: "O(n)",
-    markerLabel: "Single pass",
-    markerNote: "No model inference · 48-case test suite",
-    stack: ["Python"],
-    github: "https://github.com/Aatman09/doc_tree",
-    status: "shipped",
-    cardBullets: [
-      "PaddleOCR-VL detects where things are but not what owns what — doc_tree recovers the section tree it never produces.",
-      "Heading-type detection, dotted-number parsing and a stack. Deterministic, linear, and no model in the loop.",
-      "Section-level chunking means retrieval returns a whole subsection instead of a fragment starting mid-sentence.",
-    ],
-    deepDive: [
-      {
-        heading: "The gap it fills",
-        body: [
-          "PaddleOCR-VL does layout detection: it tells you a block is a paragraph title, a table, a figure, and where it sits on the page. It does not tell you that 3.2.2 Multi-Head Attention lives inside 3.2 Attention, because reconstructing structure is a different problem from detecting it.",
-          "Everything downstream pays for that missing hierarchy. Fixed-size chunkers slice sections in half and orphan subsections from their parents. Tables and figures lose the section they belong to, so 'which section is this table in' has no answer. Markdown generated from flat blocks is a wall of undifferentiated headings.",
-        ],
-      },
-      {
-        heading: "How it works",
-        body: [
-          "Detection runs in priority order. Only blocks already typed as headings are considered. A leading dotted number gives the depth directly — 3.2.5 is level three, dots plus one. Unnumbered headings matching known front and back matter (Abstract, References, Appendix, Index) are treated as level one. Anything left falls to a pluggable classifier using line height relative to the document median, so a project with real typography information can swap in something better without touching the rest.",
-          "The builder then walks blocks in reading order against a stack, popping until it finds the right parent and pushing each new section. Non-heading blocks attach to whatever section is currently open. Each section ends up carrying its own heading box plus the recursive union of everything it owns, with a per-page footprint for sections spanning multiple pages.",
-        ],
-      },
-      {
-        heading: "The two decisions that make it survive real scans",
-        body: [
-          "A synthetic root at level zero. Front matter before the first heading, and the document title itself, belong to the root rather than leaking out or forcing an artificial section. Every block is guaranteed exactly one owner.",
-          "Level clamping. A new heading's depth is bounded to its parent's depth plus one and floored at one. That single rule roots a partial extraction at level one, caps runaway nesting from an OCR'd 1.1.1.1.1, and keeps the tree valid when intermediate numbering is missing entirely.",
-          "Separately, repeating page furniture — running headers and footers, page numbers, logos — attaches nowhere at all. This came out of a real failure: a running header sitting above a real heading bound itself to whatever section was still open from the previous page, and one attached to List of Figures across a chapter divider dragged that section's bounding box onto the next chapter.",
-        ],
-      },
-    ],
   },
   {
     slug: "gemma2-quant",
     title: "gemma2-quant",
     oneLiner:
       "From-scratch int8 quantization for Gemma 2 2B — measured against bf16 and bitsandbytes, not just implemented.",
-    marker: "12.53",
-    markerLabel: "Perplexity",
-    markerNote: "bf16 baseline 12.46 · bitsandbytes 12.70",
+    marker: "+0.56%",
+    markerLabel: "Perplexity cost",
+    markerNote: "vs +1.93% for bitsandbytes · ~3.4× less degradation",
     stack: ["Python", "PyTorch", "Hugging Face Transformers", "FastAPI"],
     github: "https://github.com/Aatman09/gemma2-quant-serve",
     status: "shipped",
@@ -208,13 +170,81 @@ export const projects: Project[] = [
     },
   },
   {
+    slug: "bonsai",
+    title: "jax-ml/bonsai — ConvNeXt contribution",
+    oneLiner:
+      "Ported the ConvNeXt vision architecture to jax-ml/bonsai, a library of minimal JAX model implementations, merged after multiple maintainer review rounds.",
+    marker: "#69",
+    markerLabel: "Merged PR",
+    markerNote: "Merged into jax-ml/bonsai · logits match reference",
+    stack: ["Python", "JAX", "Flax"],
+    github: "https://github.com/jax-ml/bonsai/pull/69",
+    status: "shipped",
+    cardBullets: [
+      "Bonsai had no ConvNeXt implementation — ported the architecture to JAX/Flax from scratch.",
+      "Checked the port numerically: its logits match the reference implementation on the same weights and inputs.",
+      "Carried the PR through multiple rounds of maintainer code review to a merged result (PR #69).",
+    ],
+    deepDive: [
+      {
+        heading: "The contribution",
+        body: [
+          "Bonsai is a jax-ml library of minimal JAX model implementations, and it had no ConvNeXt. The port covers the full architecture — the depthwise-convolution-based ConvNeXt block, the layer-scale and stochastic-depth details, and correct weight-shape handling — written in JAX/Flax's functional style.",
+          "A port is only correct if it computes the same function. With the same pretrained weights and inputs, the JAX model's logits match the reference implementation's — the check that catches a transposed kernel or a misplaced layer scale, which otherwise run without error and quietly produce a different model.",
+          "The PR went through several rounds of maintainer review before merging — real back-and-forth on API shape and framework conventions, not a rubber-stamp merge.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "doc-tree",
+    title: "doc_tree",
+    oneLiner:
+      "Rebuilds a document's section hierarchy from the flat block list an OCR model outputs — one pass, no ML.",
+    marker: "48",
+    markerLabel: "Test cases",
+    markerNote: "Single linear pass · no model inference",
+    stack: ["Python"],
+    github: "https://github.com/Aatman09/doc_tree",
+    status: "shipped",
+    cardBullets: [
+      "PaddleOCR-VL detects where things are but not what owns what — doc_tree recovers the section tree it never produces.",
+      "Heading-type detection, dotted-number parsing and a stack. Deterministic, linear, and no model in the loop.",
+      "Section-level chunking means retrieval returns a whole subsection instead of a fragment starting mid-sentence.",
+    ],
+    deepDive: [
+      {
+        heading: "The gap it fills",
+        body: [
+          "PaddleOCR-VL does layout detection: it tells you a block is a paragraph title, a table, a figure, and where it sits on the page. It does not tell you that 3.2.2 Multi-Head Attention lives inside 3.2 Attention, because reconstructing structure is a different problem from detecting it.",
+          "Everything downstream pays for that missing hierarchy. Fixed-size chunkers slice sections in half and orphan subsections from their parents. Tables and figures lose the section they belong to, so 'which section is this table in' has no answer. Markdown generated from flat blocks is a wall of undifferentiated headings.",
+        ],
+      },
+      {
+        heading: "How it works",
+        body: [
+          "Detection runs in priority order. Only blocks already typed as headings are considered. A leading dotted number gives the depth directly — 3.2.5 is level three, dots plus one. Unnumbered headings matching known front and back matter (Abstract, References, Appendix, Index) are treated as level one. Anything left falls to a pluggable classifier using line height relative to the document median, so a project with real typography information can swap in something better without touching the rest.",
+          "The builder then walks blocks in reading order against a stack, popping until it finds the right parent and pushing each new section. Non-heading blocks attach to whatever section is currently open. Each section ends up carrying its own heading box plus the recursive union of everything it owns, with a per-page footprint for sections spanning multiple pages.",
+        ],
+      },
+      {
+        heading: "The two decisions that make it survive real scans",
+        body: [
+          "A synthetic root at level zero. Front matter before the first heading, and the document title itself, belong to the root rather than leaking out or forcing an artificial section. Every block is guaranteed exactly one owner.",
+          "Level clamping. A new heading's depth is bounded to its parent's depth plus one and floored at one. That single rule roots a partial extraction at level one, caps runaway nesting from an OCR'd 1.1.1.1.1, and keeps the tree valid when intermediate numbering is missing entirely.",
+          "Separately, repeating page furniture — running headers and footers, page numbers, logos — attaches nowhere at all. This came out of a real failure: a running header sitting above a real heading bound itself to whatever section was still open from the previous page, and one attached to List of Figures across a chapter divider dragged that section's bounding box onto the next chapter.",
+        ],
+      },
+    ],
+  },
+  {
     slug: "jax-transformer",
     title: "Transformer for Machine Translation",
     oneLiner:
       "Full encoder-decoder Transformer built from scratch in JAX/Flax for English-to-Spanish translation.",
     marker: "EN→ES",
-    markerLabel: "Translation",
-    markerNote: "Encoder–decoder written from the paper",
+    markerLabel: "From the paper",
+    markerNote: "No benchmark yet",
     stack: ["Python", "JAX", "Flax"],
     github: "https://github.com/Aatman09/Jax_TinyGPT_from_scratch",
     status: "shipped",
@@ -233,32 +263,6 @@ export const projects: Project[] = [
         heading: "JAX's functional paradigm",
         body: [
           "JAX has no mutable model state the way PyTorch's nn.Module does — everything is a pure function over explicit parameters, which is what makes jit compilation and TPU acceleration possible. Writing the Transformer this way forces a much more explicit understanding of exactly what state the model carries at every step, compared to letting a framework's object model hide it.",
-        ],
-      },
-    ],
-  },
-  {
-    slug: "bonsai",
-    title: "jax-ml/bonsai — ConvNeXt contribution",
-    oneLiner:
-      "Ported the ConvNeXt vision architecture to Google's JAX model library, merged after multiple maintainer review rounds.",
-    marker: "#69",
-    markerLabel: "Merged PR",
-    markerNote: "jax-ml/bonsai, after several review rounds",
-    stack: ["Python", "JAX", "Flax"],
-    github: "https://github.com/jax-ml/bonsai/pull/69",
-    status: "shipped",
-    cardBullets: [
-      "Bonsai had no ConvNeXt implementation — ported the architecture to JAX/Flax from scratch.",
-      "Adapted the model to JAX's stateless functional paradigm for TPU and GPU compatibility.",
-      "Carried the PR through multiple rounds of maintainer code review to a merged result (PR #69).",
-    ],
-    deepDive: [
-      {
-        heading: "The contribution",
-        body: [
-          "Bonsai is Google's JAX model library, and it had no ConvNeXt implementation. The port covers the full architecture — the depthwise-convolution-based ConvNeXt block, the layer-scale and stochastic-depth details, and correct weight-shape handling — adapted to JAX/Flax's functional style so it runs the same way on GPU and TPU.",
-          "The PR went through several rounds of maintainer review before merging — real back-and-forth on API shape and framework conventions, not a rubber-stamp merge.",
         ],
       },
     ],

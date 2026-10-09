@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Quantizer from "@/components/Quantizer";
@@ -8,6 +9,22 @@ export function generateStaticParams() {
 }
 
 export const dynamicParams = false;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const project = getProject(slug);
+  if (!project) return {};
+  const title = `${project.title} — Aatman Soni`;
+  return {
+    title,
+    description: project.oneLiner,
+    openGraph: { title, description: project.oneLiner, type: "article" },
+  };
+}
 
 export default async function ProjectPage({
   params,
@@ -73,6 +90,43 @@ export default async function ProjectPage({
           )}
         </div>
       </header>
+
+      {project.cardBullets.length > 0 && (
+        <section className="mt-10 max-w-[44rem]">
+          <h2 className="label text-graphite">TL;DR</h2>
+          <ul className="mt-4 space-y-2.5">
+            {project.cardBullets.map((b, i) => (
+              <li
+                key={i}
+                className="flex gap-3 text-[0.9375rem] leading-7 text-ink-2"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-[0.7rem] h-1.5 w-1.5 shrink-0 bg-signal"
+                />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {project.media && (
+        <figure className="mt-14">
+          {/* Static export: images are served unoptimized, so a plain img is the honest choice. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={project.media.src}
+            alt={project.media.alt}
+            className="w-full border border-rule bg-surface"
+          />
+          {project.media.caption && (
+            <figcaption className="label mt-3 text-graphite">
+              {project.media.caption}
+            </figcaption>
+          )}
+        </figure>
+      )}
 
       {project.figure === "quantizer" && (
         <section className="mt-14">
