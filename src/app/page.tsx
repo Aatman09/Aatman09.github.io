@@ -58,8 +58,8 @@ export default function Home() {
       <QuantField />
 
       {/* Hero */}
-      <section className="relative h-[100svh] min-h-[34rem] w-full overflow-hidden border-b border-rule">
-        <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[68rem] flex-col justify-end px-6 pb-14 pt-28 sm:pb-20">
+      <section className="relative w-full border-b border-rule">
+        <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[68rem] flex-col px-6 pb-16 pt-36 sm:pb-24 sm:pt-44">
           <h1
             className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"
           >
