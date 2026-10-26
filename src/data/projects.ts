@@ -16,8 +16,8 @@ export type Project = {
   /** A deployed, publicly reachable instance. Outranks the repo link when present. */
   live?: string;
   status: "shipped" | "in-progress";
-  /** Renders the interactive quantizer figure on this project's page. */
-  figure?: "quantizer";
+  /** Renders an interactive figure on this project's page. */
+  figure?: "quantizer" | "kvcache";
   /** A screenshot or recording shown under the header. Path is under public/. */
   media?: { src: string; alt: string; caption?: string };
   /** Rendered as the TL;DR at the top of the project page. */
@@ -58,6 +58,7 @@ export const projects: Project[] = [
     github: "https://github.com/Aatman09/gpt2-inference-engine",
     live: "https://cachegpt.duckdns.org",
     status: "shipped",
+    figure: "kvcache",
     cardBullets: [
       "Hand-written KV cache cutting decode from 171.6 to 16.8 ms/token — exposed as a live toggle so the difference is visible, not asserted.",
       "Instruction-tuned GPT-2-medium with LoRA into a 4.7 MB adapter training 0.29% of the weights.",

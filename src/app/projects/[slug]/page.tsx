@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import KvCacheStream from "@/components/KvCacheStream";
 import Quantizer from "@/components/Quantizer";
 import { projects, getProject } from "@/data/projects";
 
@@ -141,6 +142,22 @@ export default async function ProjectPage({
           </div>
           <div className="mt-8">
             <Quantizer />
+          </div>
+        </section>
+      )}
+
+      {project.figure === "kvcache" && (
+        <section className="mt-14">
+          <div className="max-w-2xl">
+            <h2 className="label text-graphite">How it works</h2>
+            <p className="mt-3 text-[1.0625rem] leading-8 text-ink-2">
+              Both decoders below generate the same text. Without a cache each
+              step recomputes every earlier token&apos;s key and value; with
+              one, only the newest token is computed. Watch the totals diverge.
+            </p>
+          </div>
+          <div className="mt-8">
+            <KvCacheStream />
           </div>
         </section>
       )}
