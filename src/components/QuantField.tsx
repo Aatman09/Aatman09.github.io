@@ -28,6 +28,9 @@ const ROW_GAP = 115;
 const MIN_ROWS = 3;
 const MAX_ROWS = 9;
 const RADIUS = 190;
+// Text blocks are marked data-quant-avoid; dots fade to nothing as they reach one.
+const TEXT_PAD = 14;
+const TEXT_FADE = 120;
 // Per-row scroll speed as a fraction of the page's. Slower than 1 reads as depth.
 const SPEEDS = [0.12, 0.3, 0.18, 0.4, 0.08, 0.26, 0.5, 0.2, 0.34];
 // Level ticks are only drawn when they are countable; int8 has 127 and
@@ -37,6 +40,9 @@ const MAX_DRAWN_LEVELS = 15;
 const levelsFor = (bits: number) => 2 ** (bits - 1) - 1;
 const snap = (v: number, L: number) => Math.round(v * L) / L;
 const mod = (n: number, m: number) => ((n % m) + m) % m;
+
+// Page-space boxes (scroll-independent), so scrolling needs no re-measure.
+type Box = { l: number; t: number; r: number; b: number };
 
 function weight(x: number, t: number, phase: number) {
   const u = x * Math.PI * 2;
@@ -82,6 +88,35 @@ export default function QuantField() {
     let visible = true;
     const start = performance.now();
 
+    let boxes: Box[] = [];
+
+    function measureBoxes() {
+      const sy = window.scrollY;
+      boxes = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-quant-avoid]"),
+      ).map((el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          l: r.left - TEXT_PAD,
+          t: r.top + sy - TEXT_PAD,
+          r: r.right + TEXT_PAD,
+          b: r.bottom + sy + TEXT_PAD,
+        };
+      });
+    }
+
+    // 0 inside or touching text, easing up to 1 at TEXT_FADE away from it.
+    function openness(x: number, pageY: number) {
+      let d = Infinity;
+      for (const b of boxes) {
+        const dx = Math.max(b.l - x, 0, x - b.r);
+        const dy = Math.max(b.t - pageY, 0, pageY - b.b);
+        const dd = Math.hypot(dx, dy);
+        if (dd < d) d = dd;
+      }
+      return smoothstep(0, TEXT_FADE, d);
+    }
+
     // The probe eases toward its target so entering or leaving never jumps.
     const probe = { x: 0, y: 0 };
     const pointer = { x: 0, y: 0, at: -Infinity };
@@ -100,6 +135,7 @@ export default function QuantField() {
       canvas!.height = Math.round(h * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
       rows = Math.max(MIN_ROWS, Math.min(MAX_ROWS, Math.round(h / ROW_GAP)));
+      measureBoxes();
       if (probe.x === 0 && probe.y === 0) {
         probe.x = w * 0.6;
         probe.y = h * 0.4;
@@ -138,11 +174,14 @@ export default function QuantField() {
           const v = weight(px / Math.max(w, 1) + sy * 0.0003 * (k + 1), t, phase);
           const rawY = cy + v * amp;
 
+          const f = openness(px, rawY + sy);
+          if (f < 0.02) continue;
+
           const d = Math.hypot(px - probe.x, cy - probe.y);
-          const s = smoothstep(RADIUS, RADIUS * 0.45, d);
+          const s = smoothstep(RADIUS, RADIUS * 0.45, d) * f;
 
           if (s <= 0.01) {
-            ctx!.globalAlpha = 0.22;
+            ctx!.globalAlpha = 0.22 * f;
             ctx!.fillStyle = ink;
             ctx!.fillRect(px - 1, rawY - 1, 2, 2);
             continue;
@@ -164,7 +203,7 @@ export default function QuantField() {
           ctx!.fillStyle = signal;
           ctx!.fillRect(px, Math.min(rawY, y), 1, Math.abs(y - rawY) + 1);
 
-          ctx!.globalAlpha = 0.35 + 0.65 * s;
+          ctx!.globalAlpha = (0.35 + 0.65 * s) * f;
           ctx!.fillRect(px - 1.5, y - 1.5, 3, 3);
         }
       }
@@ -232,6 +271,17 @@ export default function QuantField() {
     });
     mo.observe(root, { attributes: true, attributeFilter: ["class"] });
 
+    // Text reflows (fonts loading, wrapping, hover cards) move the boxes.
+    const bodyRO = new ResizeObserver(() => {
+      measureBoxes();
+      if (!running) draw(performance.now());
+    });
+    bodyRO.observe(document.body);
+    document.fonts?.ready.then(() => {
+      measureBoxes();
+      if (!running) draw(performance.now());
+    });
+
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointer);
@@ -243,6 +293,7 @@ export default function QuantField() {
       cancelAnimationFrame(raf);
       io.disconnect();
       mo.disconnect();
+      bodyRO.disconnect();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);

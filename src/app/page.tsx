@@ -61,6 +61,7 @@ export default function Home() {
       <section className="relative w-full border-b border-rule">
         <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[68rem] flex-col px-6 pb-16 pt-36 sm:pb-24 sm:pt-44">
           <h1
+            data-quant-avoid
             className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"
           >
             I build ML systems from scratch, then measure them.
@@ -70,7 +71,9 @@ export default function Home() {
             />
           </h1>
 
-          <div className="mt-8 max-w-xl space-y-2 font-mono text-[0.875rem] leading-7 text-graphite">
+          <div
+            data-quant-avoid
+            className="mt-8 max-w-xl space-y-2 font-mono text-[0.875rem] leading-7 text-graphite">
             <p>
               Aatman Soni · B.Tech CSE
               {education.university && ` · ${education.university}`} · seeking
@@ -84,7 +87,9 @@ export default function Home() {
             </p>
           </div>
 
-          <p className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.875rem]">
+          <p
+            data-quant-avoid
+            className="mt-7 flex w-fit flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.875rem]">
             <a
               href="mailto:aatmansoni2006@gmail.com"
               className="pointer-events-auto bg-ink px-4 py-2.5 text-paper transition-colors hover:bg-accent-text"

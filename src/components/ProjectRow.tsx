@@ -17,14 +17,20 @@ export default function ProjectRow({ project }: { project: Project }) {
         aria-hidden="true"
         className="absolute inset-y-0 left-0 w-0.5 origin-center scale-y-0 bg-signal transition-transform duration-300 ease-out group-hover:scale-y-100"
       />
-      <div className="transition-transform duration-300 ease-out group-hover:translate-x-1.5 motion-reduce:transform-none">
+      <div
+        data-quant-avoid
+        className="w-fit transition-transform duration-300 ease-out group-hover:translate-x-1.5 motion-reduce:transform-none"
+      >
         <p className="font-display text-4xl font-semibold leading-none tracking-tight text-ink transition-colors group-hover:text-accent-text sm:text-[2.75rem]">
           <CountUp text={project.marker} />
         </p>
         <p className="label mt-2 text-graphite">{project.markerLabel}</p>
       </div>
 
-      <div className="min-w-0 transition-transform duration-300 ease-out group-hover:translate-x-3 motion-reduce:transform-none">
+      <div
+        data-quant-avoid
+        className="min-w-0 transition-transform duration-300 ease-out group-hover:translate-x-3 motion-reduce:transform-none"
+      >
         <div className="flex items-baseline justify-between gap-4">
           <h3 className="font-display text-lg font-semibold tracking-tight text-ink">
             {project.title}
