@@ -6,8 +6,8 @@ import { useEffect, useRef } from "react";
  * A slowly drifting starfield on a fixed canvas behind the content.
  *
  * Stars sit on three depth layers. All of them drift the same way, but the
- * near ones move faster, and both the cursor and the scroll shift them in
- * proportion to depth, which is what makes it read as space and not wallpaper.
+ * near ones move faster, and scrolling shifts them in proportion to depth,
+ * which is what makes it read as space and not wallpaper.
  * A few twinkle and a handful carry a four-point glint. Text blocks
  * (data-field-avoid) dim the stars around them so the type stays clean. With
  * reduced motion the sky holds still.
@@ -65,9 +65,6 @@ export default function Starfield() {
     let twPhase = new Float32Array(0);
     let twRate = new Float32Array(0);
     let kind = new Uint8Array(0); // 0 plain, 1 twinkles, 2 glints, 3 accent
-
-    const pointer = { x: 0, y: 0 };
-    const look = { x: 0, y: 0 }; // eased cursor offset, -0.5..0.5
 
     function readColors() {
       const cs = getComputedStyle(root);
@@ -155,19 +152,13 @@ export default function Starfield() {
       const t = reduced.matches ? 0 : (now - start) / 1000;
       const scroll = reduced.matches ? 0 : window.scrollY;
 
-      look.x += (pointer.x / Math.max(w, 1) - 0.5 - look.x) * 0.05;
-      look.y += (pointer.y / Math.max(h, 1) - 0.5 - look.y) * 0.05;
-
       ctx!.clearRect(0, 0, w, h);
 
       for (let i = 0; i < n; i++) {
         const L = LAYERS[layer[i]];
-        const x = mod(
-          sx[i] + DRIFT_X * L.drift * t - look.x * 40 * L.par,
-          w,
-        );
+        const x = mod(sx[i] + DRIFT_X * L.drift * t, w);
         const y = mod(
-          sy0[i] + DRIFT_Y * L.drift * t - look.y * 40 * L.par - scroll * L.par * 0.25,
+          sy0[i] + DRIFT_Y * L.drift * t - scroll * L.par * 0.25,
           h,
         );
 
@@ -213,11 +204,6 @@ export default function Starfield() {
       }
     }
 
-    function onPointer(e: PointerEvent) {
-      pointer.x = e.clientX;
-      pointer.y = e.clientY;
-    }
-
     function onScroll() {
       if (!running) draw(performance.now());
     }
@@ -227,8 +213,6 @@ export default function Starfield() {
       if (!running) draw(performance.now());
     }
 
-    pointer.x = window.innerWidth / 2;
-    pointer.y = window.innerHeight / 2;
     readColors();
     resize();
     sync();
@@ -259,7 +243,6 @@ export default function Starfield() {
 
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("pointermove", onPointer);
     document.addEventListener("visibilitychange", sync);
     reduced.addEventListener("change", sync);
 
@@ -270,7 +253,6 @@ export default function Starfield() {
       bodyRO.disconnect();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("pointermove", onPointer);
       document.removeEventListener("visibilitychange", sync);
       reduced.removeEventListener("change", sync);
     };
