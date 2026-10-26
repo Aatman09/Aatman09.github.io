@@ -25,31 +25,46 @@ export default function Home() {
 
       {/* Hero */}
       <section data-landing className="relative w-full">
-        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] md:min-h-[calc(100svh-10.5rem)] w-full max-w-[68rem] flex-col justify-center px-6 pb-16 pt-28">
-          <h1
+        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] md:min-h-[calc(100svh-10.5rem)] w-full max-w-[68rem] flex-col justify-end px-6 pb-14 pt-28 md:pb-16">
+          <blockquote
             data-field-avoid
-            className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"
+            className="font-mono text-sm lowercase leading-relaxed tracking-[0.02em] text-graphite"
           >
-            I build ML systems from scratch, then measure them.
+            built from scratch,
+            <br />
+            measured against the alternative
             <span
               aria-hidden="true"
-              className="cursor-blink ml-2 inline-block h-[0.8em] w-[0.12em] translate-y-[0.06em] bg-signal"
+              className="cursor-blink ml-1 inline-block h-[1em] w-[0.55em] translate-y-[0.15em] bg-ink"
             />
-          </h1>
+          </blockquote>
 
           <div
             data-field-avoid
-            className="mt-8 max-w-xl space-y-2 font-mono text-[0.875rem] leading-7 text-graphite">
+            className="mt-9 max-w-[54rem] space-y-2 font-mono text-[0.9375rem] leading-7 text-ink"
+          >
+            <h1 className="font-normal">I&apos;m Aatman.</h1>
             <p>
-              Aatman Soni · B.Tech CSE
-              {education.university && ` · ${education.university}`} · seeking
-              ML / SDE internships
+              B.Tech CSE student
+              {education.university && ` at ${education.university}`}, seeking
+              ML / SDE internships.
             </p>
             <p>
-              Recently: int8 for{" "}
+              I build ML systems from scratch, then measure them: int8 for{" "}
               <Cited slug="gemma2-quant">Gemma 2</Cited>, a KV-cache decoder
               for <Cited slug="cachegpt">GPT-2</Cited>, a ConvNeXt port in{" "}
               <Cited slug="bonsai">jax-ml/bonsai</Cited>.
+            </p>
+            <p>
+              Before that, a Graph RAG system at{" "}
+              <Cited
+                href="/experience"
+                title="SilverTouch Technologies — AI / ML Intern"
+                blurb="Section reconstruction on PaddleOCR-VL; served a VLM on vLLM for entity extraction."
+              >
+                SilverTouch
+              </Cited>
+              .
             </p>
           </div>
 
