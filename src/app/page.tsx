@@ -25,7 +25,7 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative w-full">
-        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[calc(100svh-10rem)] w-full max-w-[68rem] flex-col justify-center px-6 pb-16 pt-28">
+        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[calc(100svh-10.5rem)] w-full max-w-[68rem] flex-col justify-center px-6 pb-16 pt-28">
           <h1
             data-field-avoid
             className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"
@@ -55,27 +55,35 @@ export default function Home() {
 
           <p
             data-field-avoid
-            className="mt-7 flex w-fit flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.875rem]">
-            <a
-              href="mailto:aatmansoni2006@gmail.com"
-              className="pointer-events-auto bg-ink px-4 py-2.5 text-paper transition-colors hover:bg-accent-text"
-            >
-              Get in touch
-            </a>
+            className="mt-7 flex w-fit flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[0.875rem] text-graphite"
+          >
             <Link
               href="/projects"
               className="pointer-events-auto text-ink underline decoration-1 underline-offset-[5px] transition-colors hover:text-accent-text"
             >
-              view projects →
+              projects →
             </Link>
+            <span aria-hidden="true" className="opacity-40">
+              /
+            </span>
+            <a
+              href="mailto:aatmansoni2006@gmail.com"
+              className="pointer-events-auto underline decoration-1 underline-offset-[5px] transition-colors hover:text-ink"
+            >
+              email
+            </a>
             {contacts.map((c) => (
-              <a
-                key={c.label}
-                href={c.href}
-                className="pointer-events-auto text-graphite underline decoration-1 underline-offset-[5px] transition-colors hover:text-ink"
-              >
-                {c.label.toLowerCase()}
-              </a>
+              <span key={c.label} className="flex items-center gap-3">
+                <span aria-hidden="true" className="opacity-40">
+                  /
+                </span>
+                <a
+                  href={c.href}
+                  className="pointer-events-auto underline decoration-1 underline-offset-[5px] transition-colors hover:text-ink"
+                >
+                  {c.label.toLowerCase()}
+                </a>
+              </span>
             ))}
           </p>
         </div>

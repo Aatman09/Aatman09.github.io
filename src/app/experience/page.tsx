@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { experience } from "@/data/experience";
+import { stack } from "@/data/stack";
 
 export const metadata = {
   title: "Experience — Aatman Soni",
@@ -52,6 +53,27 @@ export default function ExperiencePage() {
             </div>
           </section>
         ))}
+
+        <section className="grid grid-cols-1 gap-x-10 gap-y-3 py-10 sm:grid-cols-[9rem_1fr]">
+          <h2 className="label text-graphite sm:pt-1.5">Stack</h2>
+          <div className="grid gap-x-10 gap-y-8 sm:grid-cols-3">
+            {stack.map((g) => (
+              <div key={g.group}>
+                <h3 className="label text-graphite">{g.group}</h3>
+                <ul className="mt-3 space-y-1.5">
+                  {g.items.map((item) => (
+                    <li
+                      key={item}
+                      className="font-mono text-[0.8125rem] leading-6 text-ink-2"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
