@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const links = [
+  { href: "/", label: "Home", active: (p: string) => p === "/" },
   {
     href: "/projects",
     label: "Projects",
@@ -26,13 +27,6 @@ export default function Dock() {
         aria-label="Primary"
         className="pointer-events-auto flex items-center gap-1 border border-rule-strong bg-surface p-1.5"
       >
-        <Link
-          href="/"
-          aria-label="Home"
-          className="grid h-7 w-7 place-items-center bg-ink font-mono text-[0.625rem] font-semibold text-paper"
-        >
-          AS
-        </Link>
         {links.map((l) => (
           <Link
             key={l.href}
