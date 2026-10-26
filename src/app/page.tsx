@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Cited from "@/components/Cited";
-import Jellyfish from "@/components/Jellyfish";
+import Starfield from "@/components/Starfield";
 
 // Empty fields are left out of the hero.
 const education = {
@@ -19,7 +19,7 @@ const contacts = [
 export default function Home() {
   return (
     <>
-      <Jellyfish />
+      <Starfield />
 
       {/* Hero */}
       <section className="relative w-full">
