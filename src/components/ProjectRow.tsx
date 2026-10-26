@@ -18,7 +18,7 @@ export default function ProjectRow({ project }: { project: Project }) {
         className="absolute inset-y-0 left-0 w-0.5 origin-center scale-y-0 bg-signal transition-transform duration-300 ease-out group-hover:scale-y-100"
       />
       <div
-        data-quant-avoid
+        data-field-avoid
         className="w-fit transition-transform duration-300 ease-out group-hover:translate-x-1.5 motion-reduce:transform-none"
       >
         <p className="font-display text-4xl font-semibold leading-none tracking-tight text-ink transition-colors group-hover:text-accent-text sm:text-[2.75rem]">
@@ -28,7 +28,7 @@ export default function ProjectRow({ project }: { project: Project }) {
       </div>
 
       <div
-        data-quant-avoid
+        data-field-avoid
         className="min-w-0 transition-transform duration-300 ease-out group-hover:translate-x-3 motion-reduce:transform-none"
       >
         <div className="flex items-baseline justify-between gap-4">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Cited from "@/components/Cited";
 import ProjectRow from "@/components/ProjectRow";
-import QuantField from "@/components/QuantField";
+import Fireflies from "@/components/Fireflies";
 import { projects } from "@/data/projects";
 import { experience } from "@/data/experience";
 
@@ -55,13 +55,13 @@ const contacts = [
 export default function Home() {
   return (
     <>
-      <QuantField />
+      <Fireflies />
 
       {/* Hero */}
       <section className="relative w-full border-b border-rule">
         <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[68rem] flex-col px-6 pb-16 pt-36 sm:pb-24 sm:pt-44">
           <h1
-            data-quant-avoid
+            data-field-avoid
             className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"
           >
             I build ML systems from scratch, then measure them.
@@ -72,7 +72,7 @@ export default function Home() {
           </h1>
 
           <div
-            data-quant-avoid
+            data-field-avoid
             className="mt-8 max-w-xl space-y-2 font-mono text-[0.875rem] leading-7 text-graphite">
             <p>
               Aatman Soni · B.Tech CSE
@@ -88,7 +88,7 @@ export default function Home() {
           </div>
 
           <p
-            data-quant-avoid
+            data-field-avoid
             className="mt-7 flex w-fit flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.875rem]">
             <a
               href="mailto:aatmansoni2006@gmail.com"
