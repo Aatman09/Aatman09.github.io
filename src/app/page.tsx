@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Cited from "@/components/Cited";
 import ProjectRow from "@/components/ProjectRow";
-import Fireflies from "@/components/Fireflies";
+import Jellyfish from "@/components/Jellyfish";
 import { projects } from "@/data/projects";
 import { experience } from "@/data/experience";
 
@@ -55,7 +55,7 @@ const contacts = [
 export default function Home() {
   return (
     <>
-      <Fireflies />
+      <Jellyfish />
 
       {/* Hero */}
       <section className="relative w-full border-b border-rule">
