@@ -58,69 +58,49 @@ export default function Home() {
       {/* Hero */}
       <section className="relative h-[100svh] min-h-[34rem] w-full overflow-hidden border-b border-rule">
         <QuantField />
-        <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[68rem] flex-col justify-end gap-9 px-6 pb-14 pt-28 sm:pb-20">
-          <blockquote
+        <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[68rem] flex-col justify-end px-6 pb-14 pt-28 sm:pb-20">
+          <h1
             data-quant-avoid
-            className="font-mono text-sm lowercase leading-relaxed tracking-[0.02em] text-graphite"
+            className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"
           >
-            built from scratch,
-            <br />
-            measured against the alternative
+            I build ML systems from scratch, then measure them.
             <span
               aria-hidden="true"
-              className="cursor-blink ml-1 inline-block h-[1em] w-[0.55em] translate-y-[0.15em] bg-ink"
+              className="cursor-blink ml-2 inline-block h-[0.8em] w-[0.12em] translate-y-[0.06em] bg-signal"
             />
-          </blockquote>
+          </h1>
 
-          <div className="max-w-[54rem] space-y-3 font-mono text-[0.9375rem] leading-7 text-ink-2">
-            <h1 className="font-mono text-2xl font-semibold tracking-tight text-ink">
-              I&apos;m Aatman.
-            </h1>
+          <div className="mt-8 max-w-xl space-y-2 font-mono text-[0.875rem] leading-7 text-graphite">
             <p>
-              B.Tech CSE student
-              {education.university && ` at ${education.university}`}, building
-              ML systems from scratch and measuring them. Seeking ML / SDE
-              internships.
+              Aatman Soni · B.Tech CSE
+              {education.university && ` · ${education.university}`} · seeking
+              ML / SDE internships
             </p>
             <p>
-              I wrote an int8 quantizer for{" "}
-              <Cited slug="gemma2-quant">Gemma 2</Cited>, a KV-cache decoder for{" "}
-              <Cited slug="cachegpt">GPT-2</Cited>, and a ConvNeXt port merged
-              into <Cited slug="bonsai">jax-ml/bonsai</Cited>.
-            </p>
-            <p>
-              Before that, a Graph RAG system at{" "}
-              <Cited
-                href="/experience"
-                title="SilverTouch Technologies — AI / ML Intern"
-                blurb="Section reconstruction on PaddleOCR-VL; served a VLM on vLLM for entity extraction."
-              >
-                SilverTouch
-              </Cited>
-              , and{" "}
-              <Cited slug="doc-tree">doc_tree</Cited>, the section-tree builder
-              that came out of it.
-            </p>
-            <p className="pt-2">
-              <a
-                href="mailto:aatmansoni2006@gmail.com"
-                className="pointer-events-auto text-ink underline decoration-1 underline-offset-[5px] hover:text-accent-text"
-              >
-                aatmansoni2006@gmail.com
-              </a>
-              {contacts.map((c) => (
-                <span key={c.label}>
-                  <span className="opacity-40"> / </span>
-                  <a
-                    href={c.href}
-                    className="pointer-events-auto underline decoration-1 underline-offset-[5px] opacity-70 hover:text-ink hover:opacity-100"
-                  >
-                    {c.label.toLowerCase()}
-                  </a>
-                </span>
-              ))}
+              Recently: int8 for{" "}
+              <Cited slug="gemma2-quant">Gemma 2</Cited>, a KV-cache decoder
+              for <Cited slug="cachegpt">GPT-2</Cited>, a ConvNeXt port in{" "}
+              <Cited slug="bonsai">jax-ml/bonsai</Cited>.
             </p>
           </div>
+
+          <p className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.875rem]">
+            <a
+              href="mailto:aatmansoni2006@gmail.com"
+              className="pointer-events-auto bg-ink px-4 py-2.5 text-paper transition-colors hover:bg-accent-text"
+            >
+              Get in touch
+            </a>
+            {contacts.map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                className="pointer-events-auto text-graphite underline decoration-1 underline-offset-[5px] transition-colors hover:text-ink"
+              >
+                {c.label.toLowerCase()}
+              </a>
+            ))}
+          </p>
         </div>
       </section>
 

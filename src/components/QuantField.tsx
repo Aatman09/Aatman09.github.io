@@ -20,8 +20,8 @@ const PRECISIONS = [
 ];
 const START = 1;
 
-const COL_GAP = 24;
-const MAX_TRACES = 4;
+const COL_GAP = 30;
+const MAX_TRACES = 3;
 const DOCK_CLEARANCE = 92;
 const RADIUS = 190;
 // Level ticks are only drawn when they are countable; int8 has 127 and
@@ -47,9 +47,6 @@ function smoothstep(e0: number, e1: number, x: number) {
 
 export default function QuantField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const levelsRef = useRef<HTMLSpanElement>(null);
-  const errRef = useRef<HTMLSpanElement>(null);
-  const snappedRef = useRef<HTMLSpanElement>(null);
   const precisionRef = useRef(START);
   const [precision, setPrecision] = useState(START);
 
@@ -77,7 +74,6 @@ export default function QuantField() {
     let raf = 0;
     let running = false;
     let visible = true;
-    let frame = 0;
     const start = performance.now();
 
     // The probe eases toward its target so entering or leaving never jumps.
@@ -137,7 +133,6 @@ export default function QuantField() {
       ctx!.clearRect(0, 0, w, h);
 
       const cols = Math.ceil(w / COL_GAP) + 1;
-      let snapped = 0;
 
       for (let k = 0; k < traceY.length; k++) {
         const cy = traceY[k];
@@ -152,7 +147,7 @@ export default function QuantField() {
           const s = smoothstep(RADIUS, RADIUS * 0.45, d);
 
           if (s <= 0.01) {
-            ctx!.globalAlpha = 0.3;
+            ctx!.globalAlpha = 0.22;
             ctx!.fillStyle = ink;
             ctx!.fillRect(px - 1, rawY - 1, 2, 2);
             continue;
@@ -160,7 +155,6 @@ export default function QuantField() {
 
           const q = snap(v, L);
           const y = cy + (v + (q - v) * s) * amp;
-          if (s > 0.5) snapped++;
 
           if (L <= MAX_DRAWN_LEVELS) {
             ctx!.globalAlpha = 0.16 * s;
@@ -180,12 +174,6 @@ export default function QuantField() {
         }
       }
       ctx!.globalAlpha = 1;
-
-      if (frame++ % 6 === 0) {
-        if (levelsRef.current) levelsRef.current.textContent = String(L * 2 + 1);
-        if (errRef.current) errRef.current.textContent = (0.5 / L).toFixed(3);
-        if (snappedRef.current) snappedRef.current.textContent = String(snapped);
-      }
     }
 
     function loop(now: number) {
@@ -274,19 +262,9 @@ export default function QuantField() {
         type="button"
         onClick={cycle}
         aria-label={`Quantization precision ${current.label}. Switch to ${next.label}.`}
-        className="tnum absolute right-6 top-24 z-20 text-right font-mono text-[11px] leading-relaxed text-graphite transition-colors hover:text-ink focus-visible:text-ink lg:right-[8vw]"
+        className="absolute right-6 top-24 z-20 font-mono text-[11px] tracking-[0.13em] text-graphite uppercase transition-colors hover:text-ink focus-visible:text-ink lg:right-[8vw]"
       >
-        <span className="block text-accent-text">{current.label}</span>
-        <span className="block">
-          <span ref={levelsRef}>–</span> levels
-        </span>
-        <span className="block">
-          max err <span ref={errRef}>–</span>
-        </span>
-        <span className="block">
-          <span ref={snappedRef}>–</span> snapped
-        </span>
-        <span className="mt-1.5 block opacity-70">click → {next.label}</span>
+        <span className="text-accent-text">{current.label}</span> ↻
       </button>
     </>
   );
