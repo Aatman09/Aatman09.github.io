@@ -13,12 +13,12 @@ export default function ProjectPanel({ project }: { project: Project }) {
       href={`/projects/${project.slug}`}
       className="group flex min-w-0 flex-col outline-offset-8"
     >
-      <p className="font-display text-[2.5rem] font-semibold leading-none tracking-tight text-ink transition-colors duration-300 group-hover:text-accent-text xl:text-[2.25rem] 2xl:text-[2.75rem]">
+      <p className="font-display text-[1.5rem] font-semibold leading-none tracking-tight text-ink transition-colors duration-300 group-hover:text-accent-text">
         <CountUp text={project.marker} />
       </p>
       <p className="label mt-2 text-graphite">{project.markerLabel}</p>
 
-      <h2 className="mt-7 flex items-baseline justify-between gap-3 font-display text-lg font-semibold tracking-tight text-ink">
+      <h2 className="mt-6 flex items-baseline justify-between gap-3 font-display text-lg font-semibold tracking-tight text-ink">
         <span className="min-w-0">{project.title}</span>
         <span
           aria-hidden="true"

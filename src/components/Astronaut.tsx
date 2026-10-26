@@ -18,6 +18,7 @@ const SCALE = 1.45;
 const TETHER_NODES = 16;
 const TETHER_SEG = 10;
 const REST = 7; // seconds between passes
+const DOCK_CLEARANCE = 96;
 
 const clamp = (v: number, lo: number, hi: number) =>
   v < lo ? lo : v > hi ? hi : v;
@@ -63,6 +64,7 @@ export default function Astronaut() {
       waitUntil: 0,
     };
     const tether = new Float32Array(TETHER_NODES * 2);
+    let launched = false; // true once a later pass has begun
 
     function readColors() {
       const cs = getComputedStyle(root);
@@ -106,18 +108,37 @@ export default function Astronaut() {
       }
     }
 
+    // A height where a pass is seen in full: the open sky above the text, or
+    // the strip under it, whichever is taller. Phones have only the sky.
+    function pickY() {
+      const sy = window.scrollY;
+      const top = boxes.length
+        ? Math.min(...boxes.map((b) => b.t)) - sy
+        : h * 0.5;
+      const bottom = boxes.length
+        ? Math.max(...boxes.map((b) => b.b)) - sy
+        : h * 0.5;
+      const above = [DOCK_CLEARANCE, top - 60];
+      const below = [bottom + 60, h - 90];
+      const best =
+        above[1] - above[0] >= below[1] - below[0] ? above : below;
+      const [lo, hi] = best;
+      if (hi - lo < 40) return clamp((lo + hi) / 2, 90, h - 90);
+      return lo + Math.random() * (hi - lo);
+    }
+
     // Enter from the right edge, heading left and a little down, or the mirror.
     function launch(now: number) {
       const fromRight = Math.random() < 0.5;
       const speed = 22 + Math.random() * 12;
       a.x = fromRight ? w + 120 : -120;
-      // The band under the text, so a pass is seen in full and not faded out.
-      a.y = h * (0.74 + Math.random() * 0.14);
+      a.y = pickY();
       a.vx = (fromRight ? -1 : 1) * speed;
       a.vy = (Math.random() - 0.6) * 5;
       a.rot = Math.random() * Math.PI * 2;
       a.spin = (Math.random() < 0.5 ? -1 : 1) * (0.12 + Math.random() * 0.12);
       a.waitUntil = now + REST * 1000;
+      launched = true;
       resetTether();
     }
 
@@ -302,7 +323,7 @@ export default function Astronaut() {
     resize();
     // Start mid-pass, a little right of centre, so it is there on arrival.
     a.x = w * 0.78;
-    a.y = h * 0.78;
+    a.y = pickY();
     a.vx = -24;
     a.vy = -2;
     a.waitUntil = last + REST * 1000;
@@ -328,6 +349,7 @@ export default function Astronaut() {
     bodyRO.observe(document.body);
     document.fonts?.ready.then(() => {
       measureBoxes();
+      if (!launched) a.y = pickY();
       if (!running) paint();
     });
 
