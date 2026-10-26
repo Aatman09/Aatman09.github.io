@@ -24,8 +24,8 @@ export default function Home() {
       <Astronaut />
 
       {/* Hero */}
-      <section className="relative w-full">
-        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[calc(100svh-10.5rem)] w-full max-w-[68rem] flex-col justify-center px-6 pb-16 pt-28">
+      <section data-landing className="relative w-full">
+        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] md:min-h-[calc(100svh-10.5rem)] w-full max-w-[68rem] flex-col justify-center px-6 pb-16 pt-28">
           <h1
             data-field-avoid
             className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"

@@ -198,3 +198,11 @@ body {
     clip-path: circle(var(--vt-r, 150vmax) at var(--vt-x, 50%) var(--vt-y, 50%));
   }
 }
+
+/* On a phone the landing page is one screen: the hero already carries the
+   contact links, so the footer would only push it into a scroll. */
+@media (max-width: 767px) {
+  body:has([data-landing]) footer {
+    display: none;
+  }
+}
