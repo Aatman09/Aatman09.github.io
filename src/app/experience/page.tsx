@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function ExperiencePage() {
   return (
-    <div className="mx-auto w-full max-w-[68rem] px-6 pt-10 sm:pt-14">
+    <div className="mx-auto w-full max-w-[68rem] px-6 pt-24 sm:pt-28">
       <Link
         href="/"
         className="label inline-block text-graphite transition-colors hover:text-ink"

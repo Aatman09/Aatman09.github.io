@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Cited from "@/components/Cited";
 import ProjectRow from "@/components/ProjectRow";
+import QuantField from "@/components/QuantField";
 import { projects } from "@/data/projects";
 import { experience } from "@/data/experience";
 
@@ -52,64 +54,79 @@ const contacts = [
 
 export default function Home() {
   return (
-    <div className="mx-auto w-full max-w-[68rem] px-6">
+    <>
       {/* Hero */}
-      <section className="pt-16 sm:pt-24">
-        <p className="label flex flex-wrap items-center gap-x-3 gap-y-1 text-graphite">
-          <span className="text-ink">Aatman Soni</span>
-          <span aria-hidden="true">/</span>
-          <span>ML systems</span>
-          <span aria-hidden="true">/</span>
-          <span>Ahmedabad, IN</span>
-        </p>
-        <p className="label mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-graphite">
-          <span>
-            B.Tech CSE
-            {education.university && ` · ${education.university}`}
-          </span>
-          <span aria-hidden="true">/</span>
-          {education.classOf && (
-            <>
-              <span>Class of {education.classOf}</span>
-              <span aria-hidden="true">/</span>
-            </>
-          )}
-          <span className="text-accent-text">Seeking ML / SDE internships</span>
-        </p>
-
-        <h1 className="mt-6 max-w-3xl font-display text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.035em] text-ink sm:text-[4rem]">
-          Built from scratch.
-          <br />
-          Measured against the alternative.
-        </h1>
-
-        <p className="mt-7 max-w-xl text-[1.0625rem] leading-8 text-ink-2">
-          I write the implementation — int8 quantization, a
-          KV-cache decoder, a ConvNeXt port merged into jax-ml — and then run
-          the benchmark that says whether it was worth doing.
-        </p>
-
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a
-            href="mailto:aatmansoni2006@gmail.com"
-            className="label bg-ink px-4 py-2.5 text-paper transition-colors hover:bg-accent-text"
+      <section className="relative h-[100svh] min-h-[34rem] w-full overflow-hidden border-b border-rule">
+        <QuantField />
+        <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[68rem] flex-col justify-end gap-9 px-6 pb-14 pt-28 sm:pb-20">
+          <blockquote
+            data-quant-avoid
+            className="font-mono text-sm lowercase leading-relaxed tracking-[0.02em] text-graphite"
           >
-            aatmansoni2006@gmail.com
-          </a>
-          {contacts.map((c) => (
-            <a
-              key={c.label}
-              href={c.href}
-              className="label border border-rule-strong px-4 py-2.5 text-graphite transition-colors hover:border-ink hover:text-ink"
-            >
-              {c.label}
-            </a>
-          ))}
+            built from scratch,
+            <br />
+            measured against the alternative
+            <span
+              aria-hidden="true"
+              className="cursor-blink ml-1 inline-block h-[1em] w-[0.55em] translate-y-[0.15em] bg-ink"
+            />
+          </blockquote>
+
+          <div className="max-w-[54rem] space-y-3 font-mono text-[0.9375rem] leading-7 text-ink-2">
+            <h1 className="font-mono text-2xl font-semibold tracking-tight text-ink">
+              Namaste, I&apos;m Aatman.
+            </h1>
+            <p>
+              B.Tech CSE student
+              {education.university && ` at ${education.university}`}, building
+              ML systems from scratch and measuring them. Seeking ML / SDE
+              internships.
+            </p>
+            <p>
+              I wrote an int8 quantizer for{" "}
+              <Cited slug="gemma2-quant">Gemma 2</Cited>, a KV-cache decoder for{" "}
+              <Cited slug="cachegpt">GPT-2</Cited>, and a ConvNeXt port merged
+              into <Cited slug="bonsai">jax-ml/bonsai</Cited>.
+            </p>
+            <p>
+              Before that, a Graph RAG system at{" "}
+              <Cited
+                href="/experience"
+                title="SilverTouch Technologies — AI / ML Intern"
+                blurb="Section reconstruction on PaddleOCR-VL; served a VLM on vLLM for entity extraction."
+              >
+                SilverTouch
+              </Cited>
+              , and{" "}
+              <Cited slug="doc-tree">doc_tree</Cited>, the section-tree builder
+              that came out of it.
+            </p>
+            <p className="pt-2">
+              <a
+                href="mailto:aatmansoni2006@gmail.com"
+                className="pointer-events-auto text-ink underline decoration-1 underline-offset-[5px] hover:text-accent-text"
+              >
+                aatmansoni2006@gmail.com
+              </a>
+              {contacts.map((c) => (
+                <span key={c.label}>
+                  <span className="opacity-40"> / </span>
+                  <a
+                    href={c.href}
+                    className="pointer-events-auto underline decoration-1 underline-offset-[5px] opacity-70 hover:text-ink hover:opacity-100"
+                  >
+                    {c.label.toLowerCase()}
+                  </a>
+                </span>
+              ))}
+            </p>
+          </div>
         </div>
       </section>
 
+      <div className="mx-auto w-full max-w-[68rem] px-6">
       {/* Work */}
-      <section className="mt-24 sm:mt-28">
+      <section id="work" className="mt-24 scroll-mt-24 sm:mt-28">
         <div className="flex items-baseline justify-between gap-6 border-b border-ink pb-2.5">
           <h2 className="label text-ink">Work</h2>
           <p className="label text-graphite">Value · project · stack</p>
@@ -175,6 +192,7 @@ export default function Home() {
           ))}
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }

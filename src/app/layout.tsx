@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import Script from "next/script";
-import Nav from "@/components/Nav";
+import Dock from "@/components/Dock";
 import Footer from "@/components/Footer";
 import "./globals.css";
 
@@ -9,7 +9,7 @@ const themeInitScript = `
 (function () {
   try {
     var stored = localStorage.getItem('theme');
-    var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var dark = stored ? stored === 'dark' : true;
     if (dark) document.documentElement.classList.add('dark');
   } catch (e) {}
 })();
@@ -67,7 +67,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
-        <Nav />
+        <Dock />
         <main className="flex flex-1 flex-col">{children}</main>
         <Footer />
       </body>
