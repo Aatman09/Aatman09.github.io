@@ -74,7 +74,7 @@ export default function Home() {
 
           <div className="max-w-[54rem] space-y-3 font-mono text-[0.9375rem] leading-7 text-ink-2">
             <h1 className="font-mono text-2xl font-semibold tracking-tight text-ink">
-              Namaste, I&apos;m Aatman.
+              I&apos;m Aatman.
             </h1>
             <p>
               B.Tech CSE student
