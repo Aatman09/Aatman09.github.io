@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Cited from "@/components/Cited";
+import Astronaut from "@/components/Astronaut";
 import Starfield from "@/components/Starfield";
 
 // Empty fields are left out of the hero.
@@ -20,6 +21,7 @@ export default function Home() {
   return (
     <>
       <Starfield />
+      <Astronaut />
 
       {/* Hero */}
       <section className="relative w-full">
