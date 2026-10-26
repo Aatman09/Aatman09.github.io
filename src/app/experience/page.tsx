@@ -15,7 +15,7 @@ export default function ExperiencePage() {
         <span aria-hidden="true" className="mr-1.5 tracking-normal">
           ←
         </span>
-        Work
+        Projects
       </Link>
 
       <header className="mt-12 border-b border-ink pb-8">

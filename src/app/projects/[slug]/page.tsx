@@ -45,7 +45,7 @@ export default async function ProjectPage({
         <span aria-hidden="true" className="mr-1.5 tracking-normal">
           ←
         </span>
-        Work
+        Projects
       </Link>
 
       <header className="mt-12 grid grid-cols-1 gap-x-10 gap-y-6 border-b border-ink pb-9 sm:grid-cols-[9rem_1fr]">

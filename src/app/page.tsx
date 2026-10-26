@@ -64,7 +64,7 @@ export default function Home() {
               href="/projects"
               className="pointer-events-auto text-ink underline decoration-1 underline-offset-[5px] transition-colors hover:text-accent-text"
             >
-              view work →
+              view projects →
             </Link>
             {contacts.map((c) => (
               <a

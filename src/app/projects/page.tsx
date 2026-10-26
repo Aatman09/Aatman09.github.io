@@ -5,7 +5,7 @@ import { projects } from "@/data/projects";
 import { experience } from "@/data/experience";
 
 export const metadata: Metadata = {
-  title: "Work — Aatman Soni",
+  title: "Projects — Aatman Soni",
   description:
     "Projects, experience and stack: int8 quantization, KV-cache decoding, a ConvNeXt port, and document-graph retrieval.",
 };
@@ -43,13 +43,13 @@ const stack = [
   },
 ];
 
-export default function WorkPage() {
+export default function ProjectsPage() {
   return (
     <div className="mx-auto w-full max-w-[68rem] px-6 pt-24 sm:pt-28">
-      {/* Work */}
-      <section id="work">
+      {/* Projects */}
+      <section id="projects">
         <div className="flex items-baseline justify-between gap-6 border-b border-ink pb-2.5">
-          <h2 className="label text-ink">Work</h2>
+          <h2 className="label text-ink">Projects</h2>
           <p className="label text-graphite">Value · project · stack</p>
         </div>
         <div>

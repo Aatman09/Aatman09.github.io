@@ -7,7 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 const links = [
   {
     href: "/projects",
-    label: "Work",
+    label: "Projects",
     active: (p: string) => p.startsWith("/projects"),
   },
   {
