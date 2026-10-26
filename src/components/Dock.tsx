@@ -6,9 +6,9 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 const links = [
   {
-    href: "/#work",
+    href: "/projects",
     label: "Work",
-    active: (p: string) => p === "/" || p.startsWith("/projects"),
+    active: (p: string) => p.startsWith("/projects"),
   },
   {
     href: "/experience",

@@ -1,48 +1,12 @@
 import Link from "next/link";
 import Cited from "@/components/Cited";
-import ProjectRow from "@/components/ProjectRow";
 import Jellyfish from "@/components/Jellyfish";
-import { projects } from "@/data/projects";
-import { experience } from "@/data/experience";
 
 // Empty fields are left out of the hero.
 const education = {
   university: "",
   classOf: "",
 };
-
-const stack = [
-  { group: "Languages", items: ["Python", "C++", "SQL", "TypeScript"] },
-  {
-    group: "ML / AI",
-    items: [
-      "PyTorch",
-      "JAX",
-      "Flax",
-      "Hugging Face Transformers",
-      "PEFT / LoRA",
-      "NumPy",
-      "Pandas",
-      "vLLM",
-      "llama.cpp",
-    ],
-  },
-  {
-    group: "Tools",
-    items: [
-      "Git",
-      "Docker",
-      "Linux",
-      "AWS EC2",
-      "PostgreSQL",
-      "FastAPI",
-      "SQLAlchemy",
-      "Redis",
-      "React",
-      "Next.js",
-    ],
-  },
-];
 
 const contacts = [
   { href: "https://github.com/Aatman09", label: "GitHub" },
@@ -58,8 +22,8 @@ export default function Home() {
       <Jellyfish />
 
       {/* Hero */}
-      <section className="relative w-full border-b border-rule">
-        <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[68rem] flex-col px-6 pb-16 pt-36 sm:pb-24 sm:pt-44">
+      <section className="relative w-full">
+        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[calc(100svh-10rem)] w-full max-w-[68rem] flex-col justify-center px-6 pb-16 pt-28">
           <h1
             data-field-avoid
             className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"
@@ -96,6 +60,12 @@ export default function Home() {
             >
               Get in touch
             </a>
+            <Link
+              href="/projects"
+              className="pointer-events-auto text-ink underline decoration-1 underline-offset-[5px] transition-colors hover:text-accent-text"
+            >
+              view work →
+            </Link>
             {contacts.map((c) => (
               <a
                 key={c.label}
@@ -109,75 +79,6 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-[68rem] px-6">
-      {/* Work */}
-      <section id="work" className="mt-24 scroll-mt-24 sm:mt-28">
-        <div className="flex items-baseline justify-between gap-6 border-b border-ink pb-2.5">
-          <h2 className="label text-ink">Work</h2>
-          <p className="label text-graphite">Value · project · stack</p>
-        </div>
-        <div>
-          {projects.map((p) => (
-            <ProjectRow key={p.slug} project={p} />
-          ))}
-        </div>
-      </section>
-
-      {/* Experience */}
-      <section className="mt-24 sm:mt-28">
-        <h2 className="label border-b border-ink pb-2.5 text-ink">
-          Experience
-        </h2>
-        <Link
-          href="/experience"
-          className="group grid grid-cols-1 gap-x-8 gap-y-3 border-b border-rule px-3 py-7 transition-colors hover:bg-surface sm:grid-cols-[9rem_1fr] sm:px-4"
-        >
-          <p className="label text-graphite">{experience.dates}</p>
-          <div>
-            <div className="flex items-baseline justify-between gap-4">
-              <h3 className="font-display text-lg font-semibold tracking-tight text-ink">
-                {experience.company}
-              </h3>
-              <span
-                aria-hidden="true"
-                className="shrink-0 font-mono text-sm text-graphite transition-transform group-hover:translate-x-1 group-hover:text-accent-text"
-              >
-                →
-              </span>
-            </div>
-            <p className="label mt-1.5 text-graphite">{experience.role}</p>
-            <p className="mt-3 max-w-xl text-[0.9375rem] leading-7 text-ink-2">
-              Contributed to a production Intelligent Document Processing
-              system: section reconstruction on top of PaddleOCR-VL, a
-              vision-language model chosen and served for entity extraction,
-              and an API endpoint moved onto a dedicated inference server.
-            </p>
-          </div>
-        </Link>
-      </section>
-
-      {/* Stack */}
-      <section className="mt-24 sm:mt-28">
-        <h2 className="label border-b border-ink pb-2.5 text-ink">Stack</h2>
-        <div className="grid gap-x-10 gap-y-8 pt-7 sm:grid-cols-3">
-          {stack.map((s) => (
-            <div key={s.group}>
-              <h3 className="label text-graphite">{s.group}</h3>
-              <ul className="mt-3 space-y-1.5">
-                {s.items.map((item) => (
-                  <li
-                    key={item}
-                    className="font-mono text-[0.8125rem] leading-6 text-ink-2"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
-      </div>
     </>
   );
 }
