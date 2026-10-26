@@ -22,6 +22,8 @@ const START = 1;
 
 const COL_GAP = 30;
 const MAX_TRACES = 3;
+// Each row drifts at its own speed against the scroll, which is what gives the depth.
+const PARALLAX = [-0.28, -0.16, -0.07];
 const DOCK_CLEARANCE = 92;
 const RADIUS = 190;
 // Level ticks are only drawn when they are countable; int8 has 127 and
@@ -116,6 +118,7 @@ export default function QuantField() {
       const t = reduced.matches ? 2 : (now - start) / 1000;
       const bitsIdx = precisionRef.current;
       const L = levelsFor(PRECISIONS[bitsIdx].bits);
+      const sy = reduced.matches ? 0 : Math.min(window.scrollY, h);
 
       // Idle path, replaced by the pointer while it is moving.
       const pointerLive = now - pointer.at < 2500;
@@ -135,12 +138,12 @@ export default function QuantField() {
       const cols = Math.ceil(w / COL_GAP) + 1;
 
       for (let k = 0; k < traceY.length; k++) {
-        const cy = traceY[k];
+        const cy = traceY[k] + PARALLAX[k] * sy;
         const phase = k * 1.7;
 
         for (let c = 0; c < cols; c++) {
           const px = c * COL_GAP;
-          const v = weight(px / Math.max(w, 1), t, phase);
+          const v = weight(px / Math.max(w, 1) + sy * 0.0003 * (k + 1), t, phase);
           const rawY = cy + v * amp;
 
           const d = Math.hypot(px - probe.x, cy - probe.y);
@@ -232,6 +235,10 @@ export default function QuantField() {
     });
     mo.observe(root, { attributes: true, attributeFilter: ["class"] });
 
+    const onScroll = () => {
+      if (!running) draw(performance.now());
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointer);
     document.addEventListener("visibilitychange", sync);
     reduced.addEventListener("change", sync);
@@ -241,6 +248,7 @@ export default function QuantField() {
       ro.disconnect();
       io.disconnect();
       mo.disconnect();
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
       document.removeEventListener("visibilitychange", sync);
       reduced.removeEventListener("change", sync);
