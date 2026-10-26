@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
@@ -12,11 +13,36 @@ export default function ThemeToggle() {
     setIsDark(document.documentElement.classList.contains("dark"));
   }, []);
 
-  function toggle() {
+  function toggle(e: React.MouseEvent<HTMLButtonElement>) {
     const next = !isDark;
-    setIsDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
+    const apply = () => {
+      setIsDark(next);
+      document.documentElement.classList.toggle("dark", next);
+      try {
+        localStorage.setItem("theme", next ? "dark" : "light");
+      } catch {}
+    };
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !document.startViewTransition) {
+      apply();
+      return;
+    }
+
+    // The new theme grows out of the button as a circle until it covers the page.
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const radius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y),
+    );
+    const style = document.documentElement.style;
+    style.setProperty("--vt-x", `${x}px`);
+    style.setProperty("--vt-y", `${y}px`);
+    style.setProperty("--vt-r", `${radius}px`);
+
+    document.startViewTransition(() => flushSync(apply));
   }
 
   return (

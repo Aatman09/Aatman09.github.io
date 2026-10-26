@@ -3,13 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * A field of drifting "weights" that snap to an integer grid under the cursor.
+ * A page-wide field of drifting "weights" that snap to an integer grid under
+ * the cursor.
  *
- * Each trace is a row of dots whose height is a continuous value in [-1, 1].
- * Inside the probe's radius the dots are pulled onto the nearest of 2^(b-1)-1
- * symmetric levels (the scheme gemma2-quant uses), the grid appears, and a
- * hairline shows each dot's residual. Click to change the bit width. With no
- * pointer — touch, or an idle mouse — the probe wanders on its own.
+ * It is a fixed canvas behind the content, so the whole landing page sits on
+ * it. Each row of dots is a continuous value in [-1, 1]; inside the probe's
+ * radius the dots are pulled onto the nearest of 2^(b-1)-1 symmetric levels
+ * (the scheme gemma2-quant uses), the grid appears, and a hairline shows each
+ * dot's residual. Rows scroll past at their own speeds and wrap, which is the
+ * parallax. Click anywhere that is not a link or button to change the bit
+ * width. With no pointer the probe wanders on its own.
  */
 
 const PRECISIONS = [
@@ -21,17 +24,19 @@ const PRECISIONS = [
 const START = 1;
 
 const COL_GAP = 30;
-const MAX_TRACES = 3;
-// Each row drifts at its own speed against the scroll, which is what gives the depth.
-const PARALLAX = [-0.28, -0.16, -0.07];
-const DOCK_CLEARANCE = 92;
+const ROW_GAP = 115;
+const MIN_ROWS = 3;
+const MAX_ROWS = 9;
 const RADIUS = 190;
+// Per-row scroll speed as a fraction of the page's. Slower than 1 reads as depth.
+const SPEEDS = [0.12, 0.3, 0.18, 0.4, 0.08, 0.26, 0.5, 0.2, 0.34];
 // Level ticks are only drawn when they are countable; int8 has 127 and
 // is meant to look like nothing happened.
 const MAX_DRAWN_LEVELS = 15;
 
 const levelsFor = (bits: number) => 2 ** (bits - 1) - 1;
 const snap = (v: number, L: number) => Math.round(v * L) / L;
+const mod = (n: number, m: number) => ((n % m) + m) % m;
 
 function weight(x: number, t: number, phase: number) {
   const u = x * Math.PI * 2;
@@ -68,9 +73,8 @@ export default function QuantField() {
 
     let w = 0;
     let h = 0;
-    // Rows of dots live in the space above the text, whatever its height.
-    let traceY: number[] = [];
-    let amp = 40;
+    let rows = MIN_ROWS;
+    const amp = 34;
     let ink = "#e7ecee";
     let signal = "#ff6a38";
     let raf = 0;
@@ -89,46 +93,30 @@ export default function QuantField() {
     }
 
     function resize() {
-      const rect = canvas!.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = rect.width;
-      h = rect.height;
+      w = window.innerWidth;
+      h = window.innerHeight;
       canvas!.width = Math.round(w * dpr);
       canvas!.height = Math.round(h * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const avoid = canvas!.parentElement?.querySelector<HTMLElement>(
-        "[data-quant-avoid]",
-      );
-      const bottom = (avoid?.offsetTop ?? h * 0.7) - 36;
-      const space = Math.max(bottom - DOCK_CLEARANCE, 40);
-      const count = Math.max(1, Math.min(MAX_TRACES, Math.floor(space / 70)));
-      const gap = space / count;
-      traceY = Array.from(
-        { length: count },
-        (_, i) => DOCK_CLEARANCE + gap * (i + 0.5),
-      );
-      amp = Math.min(46, gap * 0.4);
+      rows = Math.max(MIN_ROWS, Math.min(MAX_ROWS, Math.round(h / ROW_GAP)));
       if (probe.x === 0 && probe.y === 0) {
         probe.x = w * 0.6;
-        probe.y = traceY[0] ?? h * 0.2;
+        probe.y = h * 0.4;
       }
     }
 
     function draw(now: number) {
       const t = reduced.matches ? 2 : (now - start) / 1000;
-      const bitsIdx = precisionRef.current;
-      const L = levelsFor(PRECISIONS[bitsIdx].bits);
-      const sy = reduced.matches ? 0 : Math.min(window.scrollY, h);
+      const L = levelsFor(PRECISIONS[precisionRef.current].bits);
+      const sy = reduced.matches ? 0 : window.scrollY;
 
       // Idle path, replaced by the pointer while it is moving.
       const pointerLive = now - pointer.at < 2500;
-      const tx = pointerLive
-        ? pointer.x
-        : w * (0.55 + 0.3 * Math.sin(t * 0.23));
+      const tx = pointerLive ? pointer.x : w * (0.5 + 0.35 * Math.sin(t * 0.23));
       const ty = pointerLive
         ? pointer.y
-        : traceY[0] + (traceY[traceY.length - 1] - traceY[0]) *
-            (0.5 + 0.5 * Math.sin(t * 0.31 + 1));
+        : h * (0.45 + 0.3 * Math.sin(t * 0.31 + 1));
       const ease = reduced.matches ? 1 : 0.12;
       probe.x += (tx - probe.x) * ease;
       probe.y += (ty - probe.y) * ease;
@@ -136,9 +124,13 @@ export default function QuantField() {
       ctx!.clearRect(0, 0, w, h);
 
       const cols = Math.ceil(w / COL_GAP) + 1;
+      // Rows wrap past the edges so the field never runs out as you scroll.
+      const pad = amp + 12;
+      const span = h + pad * 2;
 
-      for (let k = 0; k < traceY.length; k++) {
-        const cy = traceY[k] + PARALLAX[k] * sy;
+      for (let k = 0; k < rows; k++) {
+        const base = (span * (k + 0.5)) / rows;
+        const cy = mod(base - SPEEDS[k % SPEEDS.length] * sy, span) - pad;
         const phase = k * 1.7;
 
         for (let c = 0; c < cols; c++) {
@@ -197,30 +189,35 @@ export default function QuantField() {
     }
 
     function onPointer(e: PointerEvent) {
-      const rect = canvas!.getBoundingClientRect();
-      if (
-        e.clientX < rect.left ||
-        e.clientX > rect.right ||
-        e.clientY < rect.top ||
-        e.clientY > rect.bottom
-      ) {
-        return;
-      }
-      pointer.x = e.clientX - rect.left;
-      pointer.y = e.clientY - rect.top;
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
       pointer.at = performance.now();
       if (!running) draw(pointer.at);
+    }
+
+    // Clicking bare page changes precision; links, buttons and selections do not.
+    function onClick(e: MouseEvent) {
+      const target = e.target as Element | null;
+      if (target?.closest("a, button, input, textarea, select, summary")) return;
+      if (window.getSelection()?.toString()) return;
+      const next = (precisionRef.current + 1) % PRECISIONS.length;
+      precisionRef.current = next;
+      setPrecision(next);
+      if (!running) draw(performance.now());
+    }
+
+    function onScroll() {
+      if (!running) draw(performance.now());
+    }
+
+    function onResize() {
+      resize();
+      if (!running) draw(performance.now());
     }
 
     readColors();
     resize();
     sync();
-
-    const ro = new ResizeObserver(() => {
-      resize();
-      if (!running) draw(performance.now());
-    });
-    ro.observe(canvas);
 
     const io = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
@@ -235,21 +232,21 @@ export default function QuantField() {
     });
     mo.observe(root, { attributes: true, attributeFilter: ["class"] });
 
-    const onScroll = () => {
-      if (!running) draw(performance.now());
-    };
+    window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointer);
+    window.addEventListener("click", onClick);
     document.addEventListener("visibilitychange", sync);
     reduced.addEventListener("change", sync);
 
     return () => {
       cancelAnimationFrame(raf);
-      ro.disconnect();
       io.disconnect();
       mo.disconnect();
+      window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("click", onClick);
       document.removeEventListener("visibilitychange", sync);
       reduced.removeEventListener("change", sync);
     };
@@ -263,14 +260,13 @@ export default function QuantField() {
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        onClick={cycle}
-        className="absolute inset-0 h-full w-full cursor-crosshair"
+        className="pointer-events-none fixed inset-0 -z-10 h-full w-full"
       />
       <button
         type="button"
         onClick={cycle}
         aria-label={`Quantization precision ${current.label}. Switch to ${next.label}.`}
-        className="absolute right-6 top-24 z-20 font-mono text-[11px] tracking-[0.13em] text-graphite uppercase transition-colors hover:text-ink focus-visible:text-ink lg:right-[8vw]"
+        className="fixed bottom-4 right-4 z-30 font-mono text-[11px] uppercase tracking-[0.13em] text-graphite transition-colors hover:text-ink focus-visible:text-ink"
       >
         <span className="text-accent-text">{current.label}</span> ↻
       </button>

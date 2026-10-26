@@ -9,7 +9,7 @@ const DURATION = 900;
  * digits ("EN→ES") has nothing to count and is rendered as is.
  */
 function parse(text: string) {
-  const m = text.match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/s);
+  const m = text.match(/^(\D*)(\d+(?:\.\d+)?)([\s\S]*)$/);
   if (!m) return null;
   const decimals = m[2].includes(".") ? m[2].length - m[2].indexOf(".") - 1 : 0;
   return { prefix: m[1], value: parseFloat(m[2]), decimals, suffix: m[3] };

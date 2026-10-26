@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AsciiQuant from "@/components/AsciiQuant";
 import Cited from "@/components/Cited";
 import ProjectRow from "@/components/ProjectRow";
 import QuantField from "@/components/QuantField";
@@ -55,12 +56,13 @@ const contacts = [
 export default function Home() {
   return (
     <>
+      <QuantField />
+
       {/* Hero */}
       <section className="relative h-[100svh] min-h-[34rem] w-full overflow-hidden border-b border-rule">
-        <QuantField />
+        <AsciiQuant className="pointer-events-none absolute right-6 top-1/2 z-10 hidden -translate-y-1/2 bg-paper px-3 py-2 lg:block xl:right-[6vw]" />
         <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[68rem] flex-col justify-end px-6 pb-14 pt-28 sm:pb-20">
           <h1
-            data-quant-avoid
             className="max-w-[16ch] font-display text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.04em] text-ink sm:text-[4.5rem] lg:text-[5.5rem]"
           >
             I build ML systems from scratch, then measure them.
