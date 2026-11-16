@@ -69,7 +69,7 @@ export const projects: Project[] = [
         heading: "The cache is the product",
         body: [
           "Naive generation re-runs the whole sequence through every transformer block on every new token: at step t it recomputes K and V for all t past tokens, none of which changed. Caching them per layer means each decode step does one token's worth of attention work, turning quadratic per-step cost into linear.",
-          "Two details decide whether the implementation is correct rather than merely fast. is_causal is computed dynamically from q.shape[2] == k.shape[2], so the same forward pass serves both a multi-token prefill and a single-token decode without a separate code path — during decode the lone query attends to all past keys and needs no mask at all. And position ids continue from past_length, or the position embedding table resets to zero every step and the model loses track of where it is.",
+          "Two details decide whether the implementation is correct rather than merely fast. `is_causal` is computed dynamically from `q.shape[2] == k.shape[2]`, so the same forward pass serves both a multi-token prefill and a single-token decode without a separate code path — during decode the lone query attends to all past keys and needs no mask at all. And position ids continue from `past_length`, or the position embedding table resets to zero every step and the model loses track of where it is.",
           "Measured on this machine: 16.8 ms/token cached, against 171.6 ms/token running the naive full-sequence path at an 84-token context. The app ships both and lets you switch between them mid-conversation, which is the only honest way to present a speedup.",
         ],
       },
@@ -136,9 +136,9 @@ export const projects: Project[] = [
       {
         heading: "What “from scratch” means here",
         body: [
-          "Per-channel symmetric int8, one scale per output row: scale = W.abs().amax(dim=1) / 127, with a zero-row guard (scale.clamp(min=1e-8)) to avoid division by zero.",
-          "A custom QuantizedLinear module stores the int8 weight and its scale as buffers (not parameters — no gradients needed, and buffers correctly follow .to(device) and the state dict). forward() dequantizes on the fly and runs F.linear — no full-precision weight is ever kept in memory.",
-          "quantize_model is a recursive walk over every child module that swaps each nn.Linear for a QuantizedLinear via setattr, so the same function quantizes the whole model regardless of depth.",
+          "Per-channel symmetric int8, one scale per output row: `scale = W.abs().amax(dim=1) / 127`, with a zero-row guard (`scale.clamp(min=1e-8)`) to avoid division by zero.",
+          "A custom `QuantizedLinear` module stores the int8 weight and its scale as buffers (not parameters — no gradients needed, and buffers correctly follow `.to(device)` and the state dict). `forward()` dequantizes on the fly and runs `F.linear` — no full-precision weight is ever kept in memory.",
+          "`quantize_model` is a recursive walk over every child module that swaps each `nn.Linear` for a `QuantizedLinear` via `setattr`, so the same function quantizes the whole model regardless of depth.",
           "All math runs in bf16, and the scale itself is stored in bf16 so the dequantized weight matches the model's activation dtype with no implicit casts introduced by the quantization step.",
         ],
       },
@@ -146,7 +146,7 @@ export const projects: Project[] = [
         heading: "Results — Gemma 2 2B, wikitext-2 test",
         body: [
           "My int8 beats bitsandbytes on quality (12.53 vs 12.70 perplexity). bitsandbytes casts bf16 activations to fp16 internally before its int8 matmul, and that cast costs a bit of accuracy; the from-scratch path stays in bf16 end-to-end.",
-          "bitsandbytes still wins on memory (-39% vs -27%). The gap exists because quantize_model only replaces nn.Linear layers — Gemma's embed_tokens is an nn.Embedding and stays in bf16, about 1.18GB untouched. Quantizing embeddings is a different problem (a lookup, not a matmul) and is the natural next step.",
+          "bitsandbytes still wins on memory (-39% vs -27%). The gap exists because `quantize_model` only replaces `nn.Linear` layers — Gemma's `embed_tokens` is an `nn.Embedding` and stays in bf16, about 1.18GB untouched. Quantizing embeddings is a different problem (a lookup, not a matmul) and is the natural next step.",
           "Net picture: the from-scratch pipeline sits on a more accuracy-favoring point of the memory/quality curve — roughly the same ballpark on size, about 3× less perplexity damage.",
         ],
       },
@@ -154,9 +154,9 @@ export const projects: Project[] = [
         heading: "Honest limitations",
         tone: "limits",
         body: [
-          "nn.Embedding is not quantized yet — it's the largest remaining memory chunk.",
-          "Weight tying between embed_tokens and lm_head is broken by the current Linear-replacement walk; skipping lm_head would recover the tie and shrink memory further.",
-          "Throughput (tokens/sec via model.generate) hasn't been measured yet — perplexity and memory are the two axes measured so far.",
+          "`nn.Embedding` is not quantized yet — it's the largest remaining memory chunk.",
+          "Weight tying between `embed_tokens` and `lm_head` is broken by the current Linear-replacement walk; skipping `lm_head` would recover the tie and shrink memory further.",
+          "Throughput (tokens/sec via `model.generate`) hasn't been measured yet — perplexity and memory are the two axes measured so far.",
         ],
       },
     ],
@@ -245,13 +245,12 @@ export const projects: Project[] = [
       "Full encoder-decoder Transformer built from scratch in JAX/Flax for English-to-Spanish translation.",
     marker: "EN→ES",
     markerLabel: "From the paper",
-    markerNote: "No benchmark yet",
     stack: ["Python", "JAX", "Flax"],
     github: "https://github.com/Aatman09/Jax_TinyGPT_from_scratch",
     status: "shipped",
     cardBullets: [
       "Implemented the full encoder-decoder architecture by hand: multi-head attention, positional encoding, feed-forward and residual blocks.",
-      "Expressed the model in JAX's stateless functional paradigm (pure functions, jit) so the same code accelerates on both GPU and TPU.",
+      "Expressed the model in JAX's stateless functional paradigm (pure functions, `jit`) so the same code accelerates on both GPU and TPU.",
     ],
     deepDive: [
       {
@@ -263,7 +262,7 @@ export const projects: Project[] = [
       {
         heading: "JAX's functional paradigm",
         body: [
-          "JAX has no mutable model state the way PyTorch's nn.Module does — everything is a pure function over explicit parameters, which is what makes jit compilation and TPU acceleration possible. Writing the Transformer this way forces a much more explicit understanding of exactly what state the model carries at every step, compared to letting a framework's object model hide it.",
+          "JAX has no mutable model state the way PyTorch's `nn.Module` does — everything is a pure function over explicit parameters, which is what makes `jit` compilation and TPU acceleration possible. Writing the Transformer this way forces a much more explicit understanding of exactly what state the model carries at every step, compared to letting a framework's object model hide it.",
         ],
       },
     ],

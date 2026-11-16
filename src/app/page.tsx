@@ -25,7 +25,7 @@ export default function Home() {
 
       {/* Hero */}
       <section data-landing className="relative w-full">
-        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] md:min-h-[calc(100svh-10.5rem)] w-full max-w-[68rem] flex-col justify-end px-6 pb-14 pt-28 md:pb-16">
+        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[100svh] w-full max-w-[68rem] flex-col justify-end px-6 pb-14 pt-28 md:pb-16">
           <blockquote
             data-field-avoid
             className="font-mono text-sm lowercase leading-relaxed tracking-[0.02em] text-graphite"

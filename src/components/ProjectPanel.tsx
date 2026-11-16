@@ -1,5 +1,4 @@
 import Link from "next/link";
-import CountUp from "@/components/CountUp";
 import type { Project } from "@/data/projects";
 
 /**
@@ -14,7 +13,7 @@ export default function ProjectPanel({ project }: { project: Project }) {
       className="group flex min-w-0 flex-col outline-offset-8"
     >
       <p className="font-display text-[1.5rem] font-semibold leading-none tracking-tight text-ink transition-colors duration-300 group-hover:text-accent-text">
-        <CountUp text={project.marker} />
+        {project.marker}
       </p>
       <p className="label mt-2 text-graphite">{project.markerLabel}</p>
 

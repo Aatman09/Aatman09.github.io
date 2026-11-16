@@ -18,7 +18,7 @@ export const experience = {
       label: "Retrieval",
       heading: "Intelligent Document Processing — Graph RAG system",
       body: [
-        "The team's IDP system stores a document as a graph rather than flat chunks, so it can answer questions that span distant parts of it — a clause on page 1 referencing a party defined on page 47. Positional edges connect blocks by sequence and layout; an LLM pass over each block extracts semantic edges (is_owner_of, works_at and similar) between the entities it mentions.",
+        "The team's IDP system stores a document as a graph rather than flat chunks, so it can answer questions that span distant parts of it — a clause on page 1 referencing a party defined on page 47. Positional edges connect blocks by sequence and layout; an LLM pass over each block extracts semantic edges (`is_owner_of`, `works_at` and similar) between the entities it mentions.",
         "I proposed replacing two separate pipelines — image captioning and entity-relationship extraction — with a single vision-language model that does both. I evaluated candidate models and picked Qwen3.5VL-9B, then compared vLLM, SGLang and llama.cpp as serving options. SGLang's RadixAttention was attractive for concurrent chats but incompatible with the model's quantization method; it went into production on vLLM.",
         "Changed a production API endpoint to delegate VLM inference to that dedicated vLLM server instead of loading the model in-process, and built a second endpoint for visualizing block-level bounding boxes.",
       ],

@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import KvCacheStream from "@/components/KvCacheStream";
+import Prose from "@/components/Prose";
 import Quantizer from "@/components/Quantizer";
 import { projects, getProject } from "@/data/projects";
+
+const PINNED =
+  "max-sm:sticky max-sm:left-0 max-sm:border-r max-sm:border-r-rule max-sm:bg-paper";
+// The highlight tint is translucent; over a pinned cell it has to be opaque.
+const PINNED_MINE =
+  "max-sm:[background:linear-gradient(var(--signal-soft),var(--signal-soft)),var(--paper)]";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -35,6 +42,11 @@ export default async function ProjectPage({
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
+
+  // A table with more than three columns cannot fit a phone, so it scrolls
+  // sideways there with its first column pinned as the row label.
+  const wide = (project.resultsTable?.headers.length ?? 0) > 3;
+  const pinned = wide ? PINNED : "";
 
   return (
     <div className="mx-auto w-full max-w-[68rem] px-6 pt-24 sm:pt-28">
@@ -105,7 +117,9 @@ export default async function ProjectPage({
                   aria-hidden="true"
                   className="mt-[0.7rem] h-1.5 w-1.5 shrink-0 bg-signal"
                 />
-                <span>{b}</span>
+                <span>
+                  <Prose text={b} />
+                </span>
               </li>
             ))}
           </ul>
@@ -168,15 +182,19 @@ export default async function ProjectPage({
             Results
           </h2>
           <div className="overflow-x-auto">
-            <table className="tnum w-full min-w-[34rem] border-collapse font-mono text-sm">
+            <table
+              className={`tnum w-full border-collapse font-mono text-[0.8125rem] sm:text-sm ${
+                wide ? "min-w-[34rem]" : ""
+              }`}
+            >
               <thead>
                 <tr>
                   {project.resultsTable.headers.map((h, i) => (
                     <th
                       key={h}
                       scope="col"
-                      className={`label border-b border-rule px-3 py-3 font-normal text-graphite ${
-                        i === 0 ? "text-left" : "text-right"
+                      className={`label border-b border-rule px-2.5 py-3 font-normal text-graphite sm:px-3 ${
+                        i === 0 ? `text-left ${pinned}` : "text-right"
                       }`}
                     >
                       {h}
@@ -192,10 +210,12 @@ export default async function ProjectPage({
                       {row.map((cell, j) => (
                         <td
                           key={j}
-                          className={`border-b border-rule px-3 py-3 ${
+                          className={`border-b border-rule px-2.5 py-3 sm:px-3 ${
                             j === 0
-                              ? "text-left text-ink"
-                              : "text-right text-ink-2"
+                              ? `text-left text-ink ${pinned} ${
+                                  mine && wide ? PINNED_MINE : ""
+                                }`
+                              : "whitespace-nowrap text-right text-ink-2"
                           } ${mine ? "text-ink" : ""}`}
                         >
                           {cell}
@@ -224,7 +244,7 @@ export default async function ProjectPage({
               <ul className="mt-4 space-y-2.5">
                 {section.body.map((para, i) => (
                   <li key={i} className="text-[0.9375rem] leading-7 text-ink-2">
-                    {para}
+                    <Prose text={para} />
                   </li>
                 ))}
               </ul>
@@ -240,7 +260,7 @@ export default async function ProjectPage({
               <div className="mt-4 space-y-4">
                 {section.body.map((para, i) => (
                   <p key={i} className="text-[0.9375rem] leading-7 text-ink-2">
-                    {para}
+                    <Prose text={para} />
                   </p>
                 ))}
               </div>

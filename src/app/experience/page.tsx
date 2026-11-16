@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Prose from "@/components/Prose";
 import { experience } from "@/data/experience";
 import { stack } from "@/data/stack";
 
@@ -9,17 +9,7 @@ export const metadata = {
 export default function ExperiencePage() {
   return (
     <div className="mx-auto w-full max-w-[68rem] px-6 pt-24 sm:pt-28">
-      <Link
-        href="/projects"
-        className="label inline-block text-graphite transition-colors hover:text-ink"
-      >
-        <span aria-hidden="true" className="mr-1.5 tracking-normal">
-          ←
-        </span>
-        Projects
-      </Link>
-
-      <header className="mt-12 border-b border-ink pb-8">
+      <header className="border-b border-ink pb-8">
         <p className="label text-graphite">{experience.dates}</p>
         <h1 className="mt-4 max-w-3xl font-display text-[2.25rem] font-semibold leading-[1.08] tracking-[-0.03em] text-ink sm:text-[3.25rem]">
           {experience.company}
@@ -46,7 +36,7 @@ export default function ExperiencePage() {
               <div className="mt-4 max-w-2xl space-y-4">
                 {section.body.map((para, i) => (
                   <p key={i} className="text-[0.9375rem] leading-7 text-ink-2">
-                    {para}
+                    <Prose text={para} />
                   </p>
                 ))}
               </div>

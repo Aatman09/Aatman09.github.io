@@ -199,10 +199,8 @@ body {
   }
 }
 
-/* On a phone the landing page is one screen: the hero already carries the
-   contact links, so the footer would only push it into a scroll. */
-@media (max-width: 767px) {
-  body:has([data-landing]) footer {
-    display: none;
-  }
+/* The landing page is one screen: the hero already carries the contact
+   links, so the footer would only repeat them and push it into a scroll. */
+body:has([data-landing]) footer {
+  display: none;
 }

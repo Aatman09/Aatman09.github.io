@@ -9,7 +9,10 @@ const themeInitScript = `
 (function () {
   try {
     var stored = localStorage.getItem('theme');
-    var dark = stored ? stored === 'dark' : true;
+    // Dark unless the visitor chose otherwise, here or in their system settings.
+    var dark = stored
+      ? stored === 'dark'
+      : !window.matchMedia('(prefers-color-scheme: light)').matches;
     if (dark) document.documentElement.classList.add('dark');
   } catch (e) {}
 })();
